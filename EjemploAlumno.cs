@@ -12,13 +12,14 @@ using TgcViewer.Utils.Input;
 using Microsoft.DirectX.DirectInput;
 using TgcViewer.Utils.Terrain;
 
-namespace AlumnoEjemplos.Quicksort
+namespace AlumnoEjemplos.Quicksort 
 {
     public class EjemploAlumno : TgcExample
     {
 
         const float VELOCIDAD_MOVIMIENTO = 200f;
         const float VELOCIDAD_ROTACION = 120f;
+        Barco barcoPrincipal;
 
         TgcScene escena;
         TgcMesh mainMesh; //Proximamente barco principal
@@ -79,17 +80,18 @@ namespace AlumnoEjemplos.Quicksort
             skyBox.updateValues();
 
             //Cargo el mesh del/los barco/s -> porque se carga como escena y no cargo el mesh directamente?
+            
             TgcScene scene2 = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Canoa\\Canoa-TgcScene.xml");
             mainMesh = scene2.Meshes[0];
-
+            barcoPrincipal = new Barco(100, 20, VELOCIDAD_MOVIMIENTO, VELOCIDAD_ROTACION, mainMesh);
             
             //Camara en tercera persona focuseada en el barco (canoa) 
-            //GuiController.Instance.ThirdPersonCamera.Enable = true;
-            //GuiController.Instance.ThirdPersonCamera.setCamera(mainMesh.Position, 200, 300);
+            GuiController.Instance.ThirdPersonCamera.Enable = true;
+            GuiController.Instance.ThirdPersonCamera.setCamera(mainMesh.Position, 200, 300);
 
 
             //PARA DESARROLLO DEL ESCENARIO ES MEJOR MOVERSE CON ESTA CAMARA
-            GuiController.Instance.FpsCamera.Enable = true;
+            //GuiController.Instance.FpsCamera.Enable = true;
 
             //Carpeta de archivos Media del alumno
             //string alumnoMediaFolder = GuiController.Instance.AlumnoEjemplosMediaDir;
@@ -156,7 +158,7 @@ namespace AlumnoEjemplos.Quicksort
                 mainMesh.rotateY(rotAngle);
                 GuiController.Instance.ThirdPersonCamera.rotateY(rotAngle);
             }
-
+            
             //Si hubo desplazamiento
             if (moving)
             {
