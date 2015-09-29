@@ -24,52 +24,50 @@ namespace AlumnoEjemplos.Quicksort
         public void Movimiento(float elapsedTime)
         {
             //Calcular proxima posicion de personaje segun Input
-            float moveForward = 0f;
-            float rotate = 0;
+           
             TgcD3dInput d3dInput = GuiController.Instance.D3dInput;
-            bool moving = false;
-            bool rotating = false;
+            
 
             //Adelante
             if (d3dInput.keyDown(Key.W))
             {
                 
-                moveForward =  this.acelerar();
-                moving = true;
+                 this.acelerar();
+               
             }
 
             //Atras
             if (d3dInput.keyDown(Key.S))
             {
-                moveForward = this.desacelerar();
-                moving = true;
+                this.desacelerar();
+                
             }
 
             //Derecha
             if (d3dInput.keyDown(Key.D))
             {
-                rotate = VELOCIDAD_ROTACION;
-                rotating = true;
+                this.rotar(1);
+                
             }
 
             //Izquierda
             if (d3dInput.keyDown(Key.A))
             {
-                rotate = -VELOCIDAD_ROTACION;
-                rotating = true;
+                this.rotar(-1);
+                
             }
 
             //Si hubo rotacion
-            if (rotating)
+            //if (rotating)
             {
                 //Rotar personaje y la camara, hay que multiplicarlo por el tiempo transcurrido para no atarse a la velocidad el hardware
-                float rotAngle = Geometry.DegreeToRadian(rotate * elapsedTime);
+                float rotAngle = Geometry.DegreeToRadian((float)VelocidadRot * elapsedTime);
                 this.Mesh.rotateY(rotAngle);
                 GuiController.Instance.ThirdPersonCamera.rotateY(rotAngle);
             }
 
             //Si hubo desplazamiento
-            if (moving)
+            //if (moving)
             {
 
                 //Aplicar movimiento hacia adelante o atras segun la orientacion actual del Mesh
@@ -77,25 +75,34 @@ namespace AlumnoEjemplos.Quicksort
 
                 //La velocidad de movimiento tiene que multiplicarse por el elapsedTime para hacerse independiente de la velocida de CPU
                 //Ver Unidad 2: Ciclo acoplado vs ciclo desacoplado
-                this.Mesh.moveOrientedY(moveForward * elapsedTime);
+                this.Mesh.moveOrientedY((float)VelocidadMov * elapsedTime);
             }
         }
 
-        private float acelerar()
+        private void rotar(int p)
+        {
+            if (this.VelocidadRotMax > this.VelocidadRot)
+            {
+                VelocidadRot = VelocidadRot + VelocidadRot * (1/Potencia)*(p);
+            }
+            
+        }
+
+        private void acelerar()
         {
             if (this.VelocidadMovMax > this.VelocidadMov){
                 VelocidadMov = VelocidadMov + VelocidadMov * Potencia;
             }
-            return (float)VelocidadMov;
+            
         }
 
-        private float desacelerar()
+        private void desacelerar()
         {
             if (this.VelocidadMovMax > this.VelocidadMov)
             {
                 VelocidadMov = VelocidadMov - VelocidadMov * Potencia;
             }
-            return (float)VelocidadMov;
+            
         }
     }
 }
