@@ -27,7 +27,7 @@ namespace AlumnoEjemplos.Quicksort
             Mesh = mesh;
             Potencia = potencia;
             VelocidadMov = 0;
-            velocidadRot = 0;
+            VelocidadRot = 0;
         }
     }
 }
