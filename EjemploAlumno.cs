@@ -118,11 +118,11 @@ namespace AlumnoEjemplos.Quicksort
             barcoPrincipal.Movimiento(elapsedTime);
 
             //Hacer que la camara siga al personaje en su nueva posicion
-            GuiController.Instance.ThirdPersonCamera.Target = mainMesh.Position;
+            GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
 
             //Dibujar objeto principal
             //Siempre primero hacer todos los cálculos de lógica e input y luego al final dibujar todo (ciclo update-render)
-            mainMesh.render();
+            BarcoPrincipal.Mesh.render();
 
             //Dibujamos la escena
             escena.renderAll();
