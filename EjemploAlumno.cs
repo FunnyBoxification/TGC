@@ -18,8 +18,8 @@ namespace AlumnoEjemplos.Quicksort
     public class EjemploAlumno : TgcExample
     {
 
-        const float VELOCIDAD_MOVIMIENTO = 200f;
-        const float VELOCIDAD_ROTACION = 120f;
+        const float VELOCIDAD_MOVIMIENTO = 150f;
+        const float VELOCIDAD_ROTACION = 25f;
         const float ACELERACION = 2f;
 
         BarcoPlayer barcoPrincipal;
@@ -110,7 +110,7 @@ namespace AlumnoEjemplos.Quicksort
             agua.Effect = efectoAgua;
             agua.Technique = "RenderAgua";
 
-            barcoPrincipal = new BarcoPlayer(100, 20, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh,0.1);
+            barcoPrincipal = new BarcoPlayer(100, 20, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh,0.05);
             
             //Camara en tercera persona focuseada en el barco (canoa) 
             //GuiController.Instance.ThirdPersonCamera.Enable = true;
@@ -161,7 +161,7 @@ namespace AlumnoEjemplos.Quicksort
 
             //Dibujar objeto principal
             //Siempre primero hacer todos los cálculos de lógica e input y luego al final dibujar todo (ciclo update-render)
-            BarcoPrincipal.Mesh.render();
+            barcoPrincipal.Mesh.render();
 
             //Dibujamos la escena
             escena.renderAll();

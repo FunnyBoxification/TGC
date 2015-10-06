@@ -16,13 +16,11 @@ namespace AlumnoEjemplos.Quicksort
 {
     class BarcoPlayer : Barco { 
 
-        bool rotating;
-        bool moving;
+        
 
         public BarcoPlayer(int vida, int danio, float velocidad,float aceleracion, float rotacion, TgcMesh mesh, double pot) : base (vida, danio, velocidad, rotacion, mesh,pot)
         {
-             rotating = false;
-             moving = false;
+            
         }
         
         public void Movimiento(float elapsedTime)
@@ -37,7 +35,7 @@ namespace AlumnoEjemplos.Quicksort
             {
                 
                  this.acelerar();
-                this.moving = true;
+                
                
             }
 
@@ -45,28 +43,28 @@ namespace AlumnoEjemplos.Quicksort
             if (d3dInput.keyDown(Key.S))
             {
                 this.desacelerar();
-                this.moving = true;
+               
                 
             }
 
             //Derecha
-            if (d3dInput.keyDown(Key.D))
+            if (d3dInput.keyDown(Key.D) && VelocidadMov > 15)
             {
                 this.rotar(1);
-                this.rotating = true;
+               
                 
             }
 
             //Izquierda
-            if (d3dInput.keyDown(Key.A))
+            if (d3dInput.keyDown(Key.A) && VelocidadMov > 15)
             {
                 this.rotar(-1);
-                this.rotating = true;
+               
                 
             }
 
             //Si hubo rotacion
-            if (rotating)
+            if (VelocidadMov > 15)
             {
                 //Rotar personaje y la camara, hay que multiplicarlo por el tiempo transcurrido para no atarse a la velocidad el hardware
                 float rotAngle = Geometry.DegreeToRadian((float)VelocidadRot * elapsedTime);
@@ -75,7 +73,7 @@ namespace AlumnoEjemplos.Quicksort
             }
 
             //Si hubo desplazamiento
-            if (moving)
+            //if (moving)
             {
 
                 //Aplicar movimiento hacia adelante o atras segun la orientacion actual del Mesh
@@ -89,28 +87,41 @@ namespace AlumnoEjemplos.Quicksort
 
         private void rotar(int p)
         {
-            /*if (this.VelocidadRotMax > this.VelocidadRot)
+            if (this.VelocidadRot == 0 || (VelocidadRot < 0.01 && VelocidadRot > -0.01))
             {
-                VelocidadRot = VelocidadRot + VelocidadRot * (1/Potencia)*(p);
-            }*/
-            VelocidadRot = p * VelocidadRot;
+                VelocidadRot = 0.02 * p;
+            }
+            if (VelocidadRotMax > VelocidadRot && p == 1 || p == -1 && -VelocidadRotMax < VelocidadRot)
+            {
+                VelocidadRot = VelocidadRot + (p) * Math.Abs(VelocidadRot * (Potencia));
+            }
+            
             
         }
 
         private void acelerar()
         {
-            /*if (this.VelocidadMovMax > this.VelocidadMov){
-                VelocidadMov = VelocidadMov + VelocidadMov * Potencia;
-            }*/
-            VelocidadMov = VelocidadMov;
+            if (this.VelocidadMov == 0 || (VelocidadMov < 0.05 && VelocidadMov > -0.05) )
+            {
+                VelocidadMov = 0.2;
+            }
+
+            if (this.VelocidadMovMax > this.VelocidadMov){
+                VelocidadMov = VelocidadMov + Math.Abs(VelocidadMov * Potencia);
+            }
+            //VelocidadMov = VelocidadMov;
             
         }
 
         private void desacelerar()
         {
-            if (this.VelocidadMovMax > this.VelocidadMov)
+            if (this.VelocidadMov == 0 || (this.VelocidadMov < 0.01 && this.VelocidadMov > -0.01))
             {
-                VelocidadMov = VelocidadMov - VelocidadMov * Potencia;
+                VelocidadMov = -0.1;
+            }
+            if (-this.VelocidadMovMax/3 < this.VelocidadMov)
+            {
+                VelocidadMov = VelocidadMov - Math.Abs(VelocidadMov * Potencia);
             }
             
         }
