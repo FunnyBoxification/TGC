@@ -85,45 +85,6 @@ namespace AlumnoEjemplos.Quicksort
             }
         }
 
-        private void rotar(int p)
-        {
-            if (this.VelocidadRot == 0 || (VelocidadRot < 0.01 && VelocidadRot > -0.01))
-            {
-                VelocidadRot = 0.02 * p;
-            }
-            if (VelocidadRotMax > VelocidadRot && p == 1 || p == -1 && -VelocidadRotMax < VelocidadRot)
-            {
-                VelocidadRot = VelocidadRot + (p) * Math.Abs(VelocidadRot * (Potencia));
-            }
-            
-            
-        }
-
-        private void acelerar()
-        {
-            if (this.VelocidadMov == 0 || (VelocidadMov < 0.05 && VelocidadMov > -0.05) )
-            {
-                VelocidadMov = 0.2;
-            }
-
-            if (this.VelocidadMovMax > this.VelocidadMov){
-                VelocidadMov = VelocidadMov + Math.Abs(VelocidadMov * Potencia);
-            }
-            //VelocidadMov = VelocidadMov;
-            
-        }
-
-        private void desacelerar()
-        {
-            if (this.VelocidadMov == 0 || (this.VelocidadMov < 0.01 && this.VelocidadMov > -0.01))
-            {
-                VelocidadMov = -0.1;
-            }
-            if (-this.VelocidadMovMax/3 < this.VelocidadMov)
-            {
-                VelocidadMov = VelocidadMov - Math.Abs(VelocidadMov * Potencia);
-            }
-            
-        }
+        
     }
 }

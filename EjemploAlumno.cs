@@ -23,9 +23,12 @@ namespace AlumnoEjemplos.Quicksort
         const float ACELERACION = 2f;
 
         BarcoPlayer barcoPrincipal;
+        BarcoBot barcoEnemigo;
+
+
 
         TgcScene escena;
-        TgcMesh mainMesh, agua; 
+        TgcMesh mainMesh, agua, meshBot; 
         TgcSkyBox skyBox;
         Microsoft.DirectX.Direct3D.Effect efectoAgua;
         float time;
@@ -100,6 +103,8 @@ namespace AlumnoEjemplos.Quicksort
             
             TgcScene scene2 = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Canoa\\Canoa-TgcScene.xml");
             mainMesh = scene2.Meshes[0];
+            TgcScene scene4 = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Canoa\\Canoa-TgcScene.xml");
+            meshBot = scene4.Meshes[0];
 
             TgcScene scene3 = loader.loadSceneFromFile(GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Media\\Piso\\Agua-TgcScene.xml");
             agua = scene3.Meshes[0];
@@ -111,7 +116,7 @@ namespace AlumnoEjemplos.Quicksort
             agua.Technique = "RenderAgua";
 
             barcoPrincipal = new BarcoPlayer(100, 20, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh,0.05);
-            
+            barcoEnemigo = new BarcoBot(100, 20, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, meshBot, 0.05,barcoPrincipal);
             //Camara en tercera persona focuseada en el barco (canoa) 
             //GuiController.Instance.ThirdPersonCamera.Enable = true;
             //GuiController.Instance.ThirdPersonCamera.setCamera(mainMesh.Position, 200, 300);
@@ -148,6 +153,7 @@ namespace AlumnoEjemplos.Quicksort
             g_LightDir.Normalize();
 
             barcoPrincipal.Movimiento(elapsedTime);
+            barcoEnemigo.Movimiento(elapsedTime);
 
             efectoAgua.SetValue("g_vLightPos", new Vector4(g_LightPos.X, g_LightPos.Y, g_LightPos.Z, 1));
             efectoAgua.SetValue("g_vLightDir", new Vector4(g_LightDir.X, g_LightDir.Y, g_LightDir.Z, 1));
@@ -162,6 +168,7 @@ namespace AlumnoEjemplos.Quicksort
             //Dibujar objeto principal
             //Siempre primero hacer todos los cálculos de lógica e input y luego al final dibujar todo (ciclo update-render)
             barcoPrincipal.Mesh.render();
+            barcoEnemigo.Mesh.render();
 
             //Dibujamos la escena
             escena.renderAll();
@@ -181,6 +188,7 @@ namespace AlumnoEjemplos.Quicksort
         {
             escena.disposeAll();
             mainMesh.dispose();
+            meshBot.dispose();
         }
 
 
