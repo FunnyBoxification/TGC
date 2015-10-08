@@ -23,9 +23,9 @@ namespace AlumnoEjemplos.Quicksort
         const float ACELERACION = 2f;
 
         BarcoPlayer barcoPrincipal;
-       // LinkedList<Bala> balasJugador;
+       
         BarcoBot barcoEnemigo;
-        //LinkedList<Bala> balasEnemigo;
+        
 
 
         TgcScene escena;
@@ -71,8 +71,7 @@ namespace AlumnoEjemplos.Quicksort
             b.RotateFlip(RotateFlipType.Rotate90FlipX);
             textura = Texture.FromBitmap(d3dDevice, b, Usage.None, Pool.Managed);
             
-            //balasJugador = new LinkedList<Bala>();
-           // balasEnemigo = new LinkedList<Bala>();
+            
             
             TgcSceneLoader loader = new TgcSceneLoader();
             escena = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Scenes\\Isla\\Isla-TgcScene.xml");
@@ -107,10 +106,10 @@ namespace AlumnoEjemplos.Quicksort
 
             TgcScene scene2 = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Boteconcañon\\BoteConCanion-TgcScene.xml");
             mainMesh = scene2.Meshes[0];
-            mainMesh.Position = new Vector3(200f,0f, 200f);
-            TgcScene scene4 = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Canoa\\Canoa-TgcScene.xml");
+            mainMesh.Position = new Vector3(400f,0f, 400f);
+            TgcScene scene4 = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Boteconcañon\\BoteConCanion-TgcScene.xml");
             meshBot = scene4.Meshes[0];
-            meshBot.Position = new Vector3(150f,0f,150f);
+            meshBot.Position = new Vector3(-400f,0f,400f);
 
             TgcScene scene3 = loader.loadSceneFromFile(GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Media\\Piso\\Agua-TgcScene.xml");
             agua = scene3.Meshes[0];
@@ -121,11 +120,11 @@ namespace AlumnoEjemplos.Quicksort
             agua.Effect = efectoAgua;
             agua.Technique = "RenderAgua";
 
-            TgcScene sceneBalas = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Canoa\\Canoa-TgcScene.xml");
-            mainMesh = scene2.Meshes[0];
+            
 
-            barcoPrincipal = new BarcoPlayer(100, 20, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh,0.05);
-            barcoEnemigo = new BarcoBot(100, 20, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, meshBot, 0.05,barcoPrincipal);
+            barcoPrincipal = new BarcoPlayer(100, 20, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh,0.05,loader);
+            barcoEnemigo = new BarcoBot(100, 25,100, ACELERACION, 20, meshBot, 0.05,barcoPrincipal,loader);
+            barcoPrincipal.BarcoEnemigo = barcoEnemigo;
             //Camara en tercera persona focuseada en el barco (canoa) 
             //GuiController.Instance.ThirdPersonCamera.Enable = true;
             //GuiController.Instance.ThirdPersonCamera.setCamera(mainMesh.Position, 200, 300);
@@ -164,6 +163,7 @@ namespace AlumnoEjemplos.Quicksort
             barcoPrincipal.Movimiento(elapsedTime);
             barcoEnemigo.Movimiento(elapsedTime);
 
+
             efectoAgua.SetValue("g_vLightPos", new Vector4(g_LightPos.X, g_LightPos.Y, g_LightPos.Z, 1));
             efectoAgua.SetValue("g_vLightDir", new Vector4(g_LightDir.X, g_LightDir.Y, g_LightDir.Z, 1));
             g_LightView = Matrix.LookAtLH(g_LightPos, g_LightPos + g_LightDir, new Vector3(0, 0, 1));
@@ -178,16 +178,42 @@ namespace AlumnoEjemplos.Quicksort
             //Siempre primero hacer todos los cálculos de lógica e input y luego al final dibujar todo (ciclo update-render)
             barcoPrincipal.Mesh.render();
             barcoEnemigo.Mesh.render();
+            foreach (var bala in barcoPrincipal.balas)
+            {
+                if (((bala.Mesh.Position) - (barcoPrincipal.Mesh.Position)).Length() < 200)
+                {
+                    bala.Mover(elapsedTime);
+                    bala.Mesh.render();
 
-            //Dibujamos la escena
-            escena.renderAll();
-            agua.render();
+                }
+            }
 
-            skyBox.render();
+               
+            foreach (var bala in barcoEnemigo.balas)
+                {
+                    bala.Mover(elapsedTime);
+                    bala.Mesh.render();
+                }
+
+            checkearVidas(barcoEnemigo);
+            checkearVidas(barcoPrincipal);
+                //Dibujamos la escena
+                escena.renderAll();
+                agua.render();
+
+                skyBox.render();
+
+            
 
         }
 
-       
+        private void checkearVidas(Barco barco)
+        {
+            if (barco.Vida < 0)
+            {
+                barco.Mesh.setColor(Color.Red);
+            }
+        }
 
         /// <summary>
         /// Método que se llama cuando termina la ejecución del ejemplo.

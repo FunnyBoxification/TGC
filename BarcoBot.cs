@@ -17,10 +17,11 @@ namespace AlumnoEjemplos.Quicksort
 {
     class BarcoBot : Barco
     {
-        public Barco BarcoEnemigo { get; set; }
+        int cooldown = 0;
+        
         public Vector3 LastPos { get; set; }
 
-        public BarcoBot(int vida, int danio, float velocidad,float aceleracion, float rotacion, TgcMesh mesh, double pot, Barco barcoEnemigo) : base (vida, danio, velocidad, rotacion, mesh,pot)
+        public BarcoBot(int vida, int danio, float velocidad,float aceleracion, float rotacion, TgcMesh mesh, double pot, Barco barcoEnemigo,TgcSceneLoader bm) : base (vida, danio, velocidad, rotacion, mesh,pot,bm)
         {
             BarcoEnemigo = barcoEnemigo;
             LastPos = Mesh.Position;
@@ -54,7 +55,7 @@ namespace AlumnoEjemplos.Quicksort
 
             
             // distancia para aproximarse al barco
-            if( distancia() > 100){
+            if( distancia() > 200){
                  acelerar();
                 var vect = new Vector3(FastMath.Sin(Mesh.Rotation.Y), 0 ,FastMath.Cos(Mesh.Rotation.Y));
                 var vect2 = new Vector3(FastMath.Sin(BarcoEnemigo.Mesh.Rotation.Y), 0, FastMath.Cos(BarcoEnemigo.Mesh.Rotation.Y));
@@ -82,7 +83,14 @@ namespace AlumnoEjemplos.Quicksort
             }
             else
             {
+                if(cooldown < 1){
                 frenar();
+                dispararBala();
+                cooldown = 300;
+                }else
+                {
+                 cooldown -=1;
+                }
             }
 
            

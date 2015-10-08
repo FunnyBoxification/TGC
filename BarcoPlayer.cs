@@ -14,11 +14,11 @@ using TgcViewer.Utils.Terrain;
 
 namespace AlumnoEjemplos.Quicksort
 {
-    class BarcoPlayer : Barco { 
-
+    class BarcoPlayer : Barco {
+        int cooldown = 0;
         
 
-        public BarcoPlayer(int vida, int danio, float velocidad,float aceleracion, float rotacion, TgcMesh mesh, double pot) : base (vida, danio, velocidad, rotacion, mesh,pot)
+        public BarcoPlayer(int vida, int danio, float velocidad,float aceleracion, float rotacion, TgcMesh mesh, double pot, TgcSceneLoader bm) : base (vida, danio, velocidad, rotacion, mesh,pot,bm)
         {
             
         }
@@ -61,6 +61,18 @@ namespace AlumnoEjemplos.Quicksort
                 this.rotar(-1);
                
                 
+            }
+
+            if (d3dInput.keyDown(Key.R) && cooldown < 1)
+            {
+                this.dispararBala();
+                cooldown = 400;
+
+
+            }
+            else
+            {
+                cooldown -= 1;
             }
 
             //Si hubo rotacion

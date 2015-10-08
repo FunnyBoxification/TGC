@@ -1,9 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using TgcViewer.Example;
+using TgcViewer;
+using Microsoft.DirectX.Direct3D;
+using System.Drawing;
+using Microsoft.DirectX;
 using TgcViewer.Utils.Modifiers;
 using TgcViewer.Utils.TgcSceneLoader;
+using TgcViewer.Utils.Input;
+using Microsoft.DirectX.DirectInput;
+using TgcViewer.Utils.Terrain;
+using TgcViewer.Utils.Shaders;
+
 
 namespace AlumnoEjemplos.Quicksort
 {
@@ -17,9 +26,11 @@ namespace AlumnoEjemplos.Quicksort
         public double Potencia { get; set; }
         public double VelocidadMov { get; set; }
         public double VelocidadRot { get; set; }
-        LinkedList<Bala> balas;
+        public TgcSceneLoader Loader{get;set;}
+        public List<Bala> balas{get;set;}
+        public Barco BarcoEnemigo { get; set; }
 
-        public Barco(int vida, int danio, double velocidad, double rotacion, TgcMesh mesh,double potencia)
+        public Barco(int vida, int danio, double velocidad, double rotacion, TgcMesh mesh,double potencia, TgcSceneLoader ldr)
         {
             Vida = vida;
             Danio = danio;
@@ -29,14 +40,27 @@ namespace AlumnoEjemplos.Quicksort
             Potencia = potencia;
             VelocidadMov = 0;
             VelocidadRot = 0;
-            balas = new LinkedList<Bala>();
+            Loader = ldr;
+            balas = new List<Bala>();
         }
 
         public void dispararBala()
         {
-            var bala = new Bala(Mesh.Position);
-            balas.AddLast(bala);
+            TgcMesh balaMesh;
+            TgcScene scene2 = Loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Armas\\Hacha\\Hacha-TgcScene.xml");
+            balaMesh = scene2.Meshes[0];
+            var pos = this.Mesh.Position;
+            var rot = this.Mesh.Rotation;
+            Vector3 a = new Vector3(0,10,0);
+            balaMesh.Position = this.Mesh.Position +a ;
+            
+            balaMesh.Rotation = this.Mesh.Rotation;
+            //dispara a 90 grados
+            balaMesh.rotateY(Geometry.DegreeToRadian(270));
+            var bala = new Bala(balaMesh, Danio,BarcoEnemigo);
+            balas.Add(bala);
         }
+
         public void rotar(int p)
         {
             if (this.VelocidadRot == 0 || (VelocidadRot < 0.01 && VelocidadRot > -0.01))

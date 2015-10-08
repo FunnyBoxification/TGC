@@ -11,31 +11,44 @@ using TgcViewer.Utils.TgcSceneLoader;
 using TgcViewer.Utils.Input;
 using Microsoft.DirectX.DirectInput;
 using TgcViewer.Utils.Terrain;
+using TgcViewer.Utils.TgcGeometry;
 
 namespace AlumnoEjemplos.Quicksort
 {
     class Bala
     {
-        
 
-        public Bala(Vector3 rotac)
+        bool col = false;
+        public Bala(TgcMesh mesh, int dam,Barco barcoEnem)
         {
 
-            Mesh.Rotation = rotac;
+            Mesh = mesh;
+            danio = dam;
+            BarcoEnemigo = barcoEnem;
 
         }
         public int danio { get; set; }
         public TgcMesh Mesh { get; set; }
         public float altura { get; set; }
         public float direccion { get; set; }
-
+        public Barco BarcoEnemigo { get; set; }
         
 
         public void Mover(float elapsedTime)
         {
 
+            TgcCollisionUtils.BoxBoxResult result = TgcCollisionUtils.classifyBoxBox(Mesh.BoundingBox, BarcoEnemigo.Mesh.BoundingBox);
+            if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
+            {
+                if (col = false)
+                {
+                    BarcoEnemigo.Vida = BarcoEnemigo.Vida - danio;
+                    col = true;
+                }
+            }
 
-            this.Mesh.moveOrientedY((float) altura +elapsedTime);
+            this.Mesh.rotateX((float)5 * elapsedTime);
+            this.Mesh.moveOrientedY((float) 100 *elapsedTime);
 
         }
 
