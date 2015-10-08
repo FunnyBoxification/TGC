@@ -17,6 +17,7 @@ namespace AlumnoEjemplos.Quicksort
         public double Potencia { get; set; }
         public double VelocidadMov { get; set; }
         public double VelocidadRot { get; set; }
+        LinkedList<Bala> balas;
 
         public Barco(int vida, int danio, double velocidad, double rotacion, TgcMesh mesh,double potencia)
         {
@@ -28,8 +29,14 @@ namespace AlumnoEjemplos.Quicksort
             Potencia = potencia;
             VelocidadMov = 0;
             VelocidadRot = 0;
+            balas = new LinkedList<Bala>();
         }
 
+        public void dispararBala()
+        {
+            var bala = new Bala(Mesh.Position);
+            balas.AddLast(bala);
+        }
         public void rotar(int p)
         {
             if (this.VelocidadRot == 0 || (VelocidadRot < 0.01 && VelocidadRot > -0.01))
@@ -79,7 +86,7 @@ namespace AlumnoEjemplos.Quicksort
             {
                 VelocidadMov = VelocidadMov - Math.Abs(VelocidadMov * Potencia);
             }
-
+            
         }
     }
 }

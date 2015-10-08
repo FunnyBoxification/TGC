@@ -23,13 +23,15 @@ namespace AlumnoEjemplos.Quicksort
         const float ACELERACION = 2f;
 
         BarcoPlayer barcoPrincipal;
+       // LinkedList<Bala> balasJugador;
         BarcoBot barcoEnemigo;
-
+        //LinkedList<Bala> balasEnemigo;
 
 
         TgcScene escena;
         TgcMesh mainMesh, agua, meshBot; 
         TgcSkyBox skyBox;
+        
         Microsoft.DirectX.Direct3D.Effect efectoAgua;
         float time;
         Texture textura;
@@ -69,6 +71,8 @@ namespace AlumnoEjemplos.Quicksort
             b.RotateFlip(RotateFlipType.Rotate90FlipX);
             textura = Texture.FromBitmap(d3dDevice, b, Usage.None, Pool.Managed);
             
+            //balasJugador = new LinkedList<Bala>();
+           // balasEnemigo = new LinkedList<Bala>();
             
             TgcSceneLoader loader = new TgcSceneLoader();
             escena = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Scenes\\Isla\\Isla-TgcScene.xml");
@@ -100,11 +104,13 @@ namespace AlumnoEjemplos.Quicksort
             skyBox.updateValues();
 
             //Cargo el mesh del/los barco/s -> porque se carga como escena y no cargo el mesh directamente?
-            
-            TgcScene scene2 = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Canoa\\Canoa-TgcScene.xml");
+
+            TgcScene scene2 = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Boteconcañon\\BoteConCanion-TgcScene.xml");
             mainMesh = scene2.Meshes[0];
+            mainMesh.Position = new Vector3(200f,0f, 200f);
             TgcScene scene4 = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Canoa\\Canoa-TgcScene.xml");
             meshBot = scene4.Meshes[0];
+            meshBot.Position = new Vector3(150f,0f,150f);
 
             TgcScene scene3 = loader.loadSceneFromFile(GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Media\\Piso\\Agua-TgcScene.xml");
             agua = scene3.Meshes[0];
@@ -114,6 +120,9 @@ namespace AlumnoEjemplos.Quicksort
             efectoAgua = TgcShaders.loadEffect(GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Shaders\\shader_agua.fx");
             agua.Effect = efectoAgua;
             agua.Technique = "RenderAgua";
+
+            TgcScene sceneBalas = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Canoa\\Canoa-TgcScene.xml");
+            mainMesh = scene2.Meshes[0];
 
             barcoPrincipal = new BarcoPlayer(100, 20, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh,0.05);
             barcoEnemigo = new BarcoBot(100, 20, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, meshBot, 0.05,barcoPrincipal);

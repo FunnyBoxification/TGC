@@ -11,16 +11,20 @@ using TgcViewer.Utils.TgcSceneLoader;
 using TgcViewer.Utils.Input;
 using Microsoft.DirectX.DirectInput;
 using TgcViewer.Utils.Terrain;
+using TgcViewer.Utils.TgcGeometry;
 
 namespace AlumnoEjemplos.Quicksort
 {
     class BarcoBot : Barco
     {
         public Barco BarcoEnemigo { get; set; }
+        public Vector3 LastPos { get; set; }
 
         public BarcoBot(int vida, int danio, float velocidad,float aceleracion, float rotacion, TgcMesh mesh, double pot, Barco barcoEnemigo) : base (vida, danio, velocidad, rotacion, mesh,pot)
         {
             BarcoEnemigo = barcoEnemigo;
+            LastPos = Mesh.Position;
+
         }
 
         public float distancia()
@@ -52,19 +56,25 @@ namespace AlumnoEjemplos.Quicksort
             // distancia para aproximarse al barco
             if( distancia() > 100){
                  acelerar();
+                var vect = new Vector3(FastMath.Sin(Mesh.Rotation.Y), 0 ,FastMath.Cos(Mesh.Rotation.Y));
+                var vect2 = new Vector3(FastMath.Sin(BarcoEnemigo.Mesh.Rotation.Y), 0, FastMath.Cos(BarcoEnemigo.Mesh.Rotation.Y));
+                                
                 Vector3 vectnDireccion = Vector3.Normalize(BarcoEnemigo.Mesh.Position - this.Mesh.Position);
-                Vector3 vectnMio = Vector3.Normalize(this.Mesh.Position);
+                Vector3 vectnMio = Vector3.Normalize(this.Mesh.Rotation);
+                var cdot = Vector3.Dot(vectnDireccion, vectnMio);                
+                var angulo = Geometry.RadianToDegree((float)Math.Acos(Vector3.Dot(vectnDireccion, vect)));
+                
                 //var a =VDot(vectEnem.Normalize(), vectMio.Normalize());
-                if (!(Vector3.Dot(vectnDireccion, vectnMio) == 1))
+                if (!(Vector3.Dot(vect, vectnDireccion) == 1))
                 {
 
-                    if (Vector3.Dot(vectnDireccion, vectnMio) > 0)//el barco esta a la izq
-                    {
-                        this.rotar(-1);
-                    }
-                    else //el barco esta a la derecha o atras
+                    if (Vector3.Cross(vect, vectnDireccion).Y > 0  && VelocidadMov > 15)//el barco esta a la izq
                     {
                         this.rotar(1);
+                    }
+                    if (Vector3.Cross(vect, vectnDireccion).Y <0 && VelocidadMov > 15) //el barco esta a la derecha o atras
+                    {
+                        this.rotar(-1);
                     }
 
                 }

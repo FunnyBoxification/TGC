@@ -12,14 +12,24 @@ using TgcViewer.Utils.Input;
 using Microsoft.DirectX.DirectInput;
 using TgcViewer.Utils.Terrain;
 
-namespace AlumnoEjemplos.MiGrupo
+namespace AlumnoEjemplos.Quicksort
 {
     class Bala
     {
+        
+
+        public Bala(Vector3 rotac)
+        {
+
+            Mesh.Rotation = rotac;
+
+        }
         public int danio { get; set; }
         public TgcMesh Mesh { get; set; }
         public float altura { get; set; }
         public float direccion { get; set; }
+
+        
 
         public void Mover(float elapsedTime)
         {
