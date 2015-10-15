@@ -1,29 +1,8 @@
-// ---------------------------------------------------------
-// demo shaders
-// ---------------------------------------------------------
-
-/**************************************************************************************/
-/* Variables comunes */
-/**************************************************************************************/
-
 //Matrices de transformacion
-float4x4 matWorld; //Matriz de transformacion World
-float4x4 matWorldView; //Matriz World * View
-float4x4 matWorldViewProj; //Matriz World * View * Projection
-float4x4 matInverseTransposeWorld; //Matriz Transpose(Invert(World))
-
-//Textura para DiffuseMap
-texture texDiffuseMap;
-sampler2D diffuseMap = sampler_state
-{
-	Texture = (texDiffuseMap);
-	ADDRESSU = WRAP;
-	ADDRESSV = WRAP;
-	MINFILTER = LINEAR;
-	MAGFILTER = LINEAR;
-	MIPFILTER = LINEAR;
-};
-
+float4x4 matWorld; 
+float4x4 matWorldView; 
+float4x4 matWorldViewProj; 
+float4x4 matInverseTransposeWorld; 
 
 float3 fvLightPosition = float3( -100.00, 100.00, -100.00 );
 float3 fvEyePosition = float3( 0.00, 0.00, -100.00 );
@@ -36,19 +15,37 @@ float FEscala = 0.5;
 
 // Agua 
 float2 vortice = float2(0,-100);
-float canoa_x = 0;
-float canoa_y = 0;
-float fHeightMapScale = 0.2;
+float x = 0;
+float y = 0;
+
 
 float k_la = 0.7;							// luz ambiente global
 float k_ld = 0.4;							// luz difusa
 float k_ls = 1.0;							// luz specular
 float fSpecularPower = 16.84;
 
+texture texDiffuseMap;
+sampler2D diffuseMap = sampler_state
+{
+	Texture = (texDiffuseMap);
+	ADDRESSU = WRAP;
+	ADDRESSV = WRAP;
+	MINFILTER = LINEAR;
+	MAGFILTER = LINEAR;
+	MIPFILTER = LINEAR;
+};
+
 float4x4 g_mViewLightProj;
 float4x4 g_mProjLight;
 float3   g_vLightPos;  // posicion de la luz (en World Space) = pto que representa patch emisor Bj 
 float3   g_vLightDir;  // Direcion de la luz (en World Space) = normal al patch Bj
+
+//Material del mesh
+float3 materialEmissiveColor; //Color RGB
+float3 materialAmbientColor; //Color RGB
+float4 materialDiffuseColor; //Color ARGB (tiene canal Alpha)
+float3 materialSpecularColor; //Color RGB
+float materialSpecularExp; //Exponente de specular
 
 
 
@@ -63,6 +60,16 @@ sampler_state
    MINFILTER = LINEAR;
    MAGFILTER = LINEAR;
    MIPFILTER = LINEAR;
+};
+
+texture  g_txCubeMapAgua;
+samplerCUBE g_samCubeMapAgua = 
+sampler_state
+{
+    Texture = <g_txCubeMapAgua>;
+    MinFilter = Linear;
+    MagFilter = Linear;
+    MipFilter = Linear;
 };
 
 //Output del Vertex Shader
@@ -101,11 +108,12 @@ VS_OUTPUT VSAgua( float4 Pos : POSITION,
 {
 	VS_OUTPUT Output;
 	
-	float k = 2;
+	float k = 3;
 	float vel = -3;
-	float sinarg = (5+sin( k*(Pos.x+time*vel))/2 + 5+cos(k*(Pos.y+time*vel))/2); //mul(Pos.x, 0.5) + time;
+	float sinarg = (5+sin( k*(Pos.x+time*vel))/2 + 5+cos(k*(Pos.y+time*vel))/2); //mul(Pos.x, 2.5) + time;
+	
 	Pos.y = mul(2.0, sin(sinarg));
-	//Pos.y = Pos.y + ( sin( Pos.x * 45.0 * time * vel ) * 0.6);
+
 
 	float4 VertexPositionWS = mul( Pos,matWorld );
 	
@@ -133,10 +141,10 @@ VS_OUTPUT VSAgua( float4 Pos : POSITION,
 
 	// proyecto
     Output.oPos = mul( Pos, matWorldViewProj );
-	// Output.Position = oPos;
+
     // Propago la textura
     Output.Tex = Texcoord;
-	// Output.Texcoord = Tex;
+
 
 	// devuelvo la pos. del ojo expresados en tangent space: 
 	Output.tsEye = mul( E, worldToTangentSpace );
@@ -157,8 +165,7 @@ float4 PSAgua(	float3 Pos: POSITION,
 			) : COLOR0
 {      
 
-	//vortice.x = canoa_y;
-	//vortice.y = canoa_x;
+
 	float4 vCurrSample;
 	// uso una funcion de onda para computar la altura del heightmap
 	// calculos en Tangent space: 
@@ -169,95 +176,52 @@ float4 PSAgua(	float3 Pos: POSITION,
 	float y = tsPos.y/250.0;
 	// ondulaciones globales
 	fCurrH +=(0.5+sin( k*(x+time*vel))/2 + 0.5+cos(k*(y+time*vel))/2);
-	// onda esferica sobre el vortice
-	fCurrH += sin( k*distance(float2(x,y),vortice)+time/2*vel);
-	// onda esferica sobre la canoa
-	fCurrH += sin( k*distance(float2(x,y),float2(canoa_y,canoa_x))+time*vel);
-	
-	
-	// rastro de la canoa
-	//float2 n = normalize(float2(canoa_y,-canoa_x));
-	//float2 p = normalize(float2(y-canoa_x,x-canoa_y));
-	//float dn = dot(n,p);
-	//if(dn<-0.95)
-	//{
-		// perturbacion generada por el rastro de la canoa
-		//float2 pn = float2(canoa_x,canoa_y) + n*dn;
-		//float dist = distance(p,pn);
-		//float d2 = clamp(length(p),1,10000);
-		//vN.x += 0.01*sin( 2*(dist+time*vel))/d2;
-		//vN.y += 0.01*cos( 2*(dist+time*vel))/d2;
-		//vN = normalize(vN);
-		//fCurrH += sin(50*(dist+time*vel));
-	//}
 
-	// 	ajusto segun el Hieghmap Scale y un cierto bias
-	// fCurrH <-- (fCurrH * HeightMapScale + Bias)/tsEye.z;
 	fCurrH = (fCurrH * 0.04 + 0.01)/tsEye.z;
 
 	Texcoord += tsEye.xy * fCurrH;
 	vCurrSample = tex2D( diffuseMap, Texcoord*0.1);
 	
 	// enviroment map 
-	float dist = distance(float2(x,y),vortice);
+	float dist = distance(float2(x,y),float2(0,0));
 	float fp = cos( k*dist+time*vel)*k/dist*0.01;
 	//float3 vN = float3(0,1,0);
-	float3 vN = normalize(float3(-fp*(x-vortice.x),1,-fp*(y-vortice.y)));
+	float3 vN = normalize(float3(-fp*(x-0),1,-fp*(y-0)/2));
 	
 
 	// necesito los valores en Worlds Space para acceder al cubemap
 	// Reflexion
 	float3 vEyeR = normalize(wsPos-fvEyePosition);
-    float3 EnvTex = reflect(vEyeR,vN);
-	//float4 color_reflejado = texCUBE( g_samCubeMapAgua, EnvTex);
+    	float3 EnvTex = reflect(vEyeR,vN);
+	float4 color_reflejado = texCUBE( g_samCubeMapAgua, EnvTex);
 	// Refraccion
-    float3 EnvTex1 = refract(vEyeR,-vN,1.001);
-    float3 EnvTex2 = refract(vEyeR,-vN,1.009);
-    float3 EnvTex3 = refract(vEyeR,-vN,1.02);
+    	float3 EnvTex1 = refract(vEyeR,-vN,1.001);
+    	float3 EnvTex2 = refract(vEyeR,-vN,1.009);
+    	float3 EnvTex3 = refract(vEyeR,-vN,1.02);
 	float4 color_refractado = float4(
 			tex2D( auxMap, float2(EnvTex1.x+1,-EnvTex1.z+1)*0.5).x,
 			tex2D( auxMap, float2(EnvTex2.x+1,-EnvTex2.z+1)*0.5).y,
 			tex2D( auxMap, float2(EnvTex3.x+1,-EnvTex3.z+1)*0.5).z,
 			1);
 	
-	//Combino con el Enviroment map
-    float Fresnel = 0.1 + 0.1*pow(1 + abs(dot(vN,vEyeR)),7);    
-    float4 fvBaseColor = color_refractado*(1-Fresnel);
+
+    	float Fresnel = 0.1 + 0.1*pow(1 + abs(dot(vN,vEyeR)),7);    
+    	float4 fvBaseColor = color_refractado*(1-Fresnel);
     
 	k = 0.75;
 	fvBaseColor = k*fvBaseColor + (1-k)*vCurrSample;
 	fvBaseColor.a = 0.5 + (1-Fresnel)*0.5;
 
-	// combino con el shadow map
-	float I = 0.7;
-    float3 vLight = normalize( float3( wsPos - g_vLightPos ) );
-	float cono = dot( vLight, g_vLightDir);
-	//if( cono > 0.001)
-    //{
-    	// coordenada de textura CT
-        //float2 CT = 0.5 * vPosLight.xy / vPosLight.w + float2( 0.5, 0.5 );
-        //CT.y = 1.0f - CT.y;
-		//I = (tex2D( g_samShadow, CT) + EPSILON < vPosLight.z / vPosLight.w)? 0.0f: 1.0f;  
-		
-		//float2 vecino = frac( CT*SMAP_SIZE);
-		//float prof = vPosLight.z / vPosLight.w;
-        //float s0 = (tex2D( g_samShadow, float2(CT)) + EPSILON < prof)? 0.0f: 1.0f;  
-        //float s1 = (tex2D( g_samShadow, float2(CT) + float2(1.0/SMAP_SIZE,0)) 
-		//					+ EPSILON < prof)? 0.0f: 1.0f;  
-        //float s2 = (tex2D( g_samShadow, float2(CT) + float2(0,1.0/SMAP_SIZE)) 
-		//					+ EPSILON < prof)? 0.0f: 1.0f;  
-        //float s3 = (tex2D( g_samShadow, float2(CT) + float2(1.0/SMAP_SIZE,1.0/SMAP_SIZE)) 
-		//					+ EPSILON < prof)? 0.0f: 1.0f;  
-        //I += 0.3*lerp( lerp( s0, s1, vecino.x ),lerp( s2, s3, vecino.x ),vecino.y);
-	//}
+
+	float I = 0.65465;
+
 	
-	fvBaseColor.rgb *= I;
+	fvBaseColor.rgb *=saturate(fvBaseColor*(saturate(k_la+k_ld)) + k_ls); //I;
+
 
 	return fvBaseColor;
-	//return color_reflejado;
-	//return color_refractado;
-	//return float4(Fresnel,Fresnel,Fresnel,1);
-	//return float4(0.1, 0.4, 0.63, 0.5) * 0.1;
+
+
 }
 
 technique RenderAgua

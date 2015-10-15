@@ -25,16 +25,20 @@ namespace AlumnoEjemplos.Quicksort
         BarcoPlayer barcoPrincipal;
        
         BarcoBot barcoEnemigo;
-        
 
+        CubeTexture g_pCubeMapAgua = null;
 
-        TgcScene escena;
+        static TgcScene escena;
         TgcMesh mainMesh, agua, meshBot; 
         TgcSkyBox skyBox;
+
+        float near_plane = 1f;
+        float far_plane = 10000f;
         
         Microsoft.DirectX.Direct3D.Effect efectoAgua;
         float time;
         Texture textura;
+        Texture diffuseMapTexture;
 
         Vector3 g_LightPos;						// posicion de la luz actual (la que estoy analizando)
         Vector3 g_LightDir;						// direccion de la luz actual
@@ -49,6 +53,11 @@ namespace AlumnoEjemplos.Quicksort
         public override string getName()
         {
             return "Grupo QuickSort";
+        }
+
+        public static List<TgcMesh> getEscenaMeshes()
+        {
+            return escena.Meshes;
         }
 
         public override string getDescription()
@@ -70,6 +79,10 @@ namespace AlumnoEjemplos.Quicksort
                     + "Shaders\\WorkshopShaders\\Media\\Heighmaps\\" + "TerrainTexture3.jpg");
             b.RotateFlip(RotateFlipType.Rotate90FlipX);
             textura = Texture.FromBitmap(d3dDevice, b, Usage.None, Pool.Managed);
+
+            b = (Bitmap)Bitmap.FromFile(GuiController.Instance.ExamplesMediaDir
+                    + "Shaders\\BumpMapping_DiffuseMap.jpg");
+            diffuseMapTexture = Texture.FromBitmap(d3dDevice, b, Usage.None, Pool.Managed);
             
             
             
@@ -104,10 +117,10 @@ namespace AlumnoEjemplos.Quicksort
 
             //Cargo el mesh del/los barco/s -> porque se carga como escena y no cargo el mesh directamente?
 
-            TgcScene scene2 = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Boteconcañon\\BoteConCanion-TgcScene.xml");
+            TgcScene scene2 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "Boteconcañon\\BoteConCanion-TgcScene.xml");
             mainMesh = scene2.Meshes[0];
             mainMesh.Position = new Vector3(400f,0f, 400f);
-            TgcScene scene4 = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Vehiculos\\Boteconcañon\\BoteConCanion-TgcScene.xml");
+            TgcScene scene4 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "Boteconcañon\\BoteConCanion-TgcScene.xml");
             meshBot = scene4.Meshes[0];
             meshBot.Position = new Vector3(-400f,0f,400f);
 
@@ -116,7 +129,7 @@ namespace AlumnoEjemplos.Quicksort
             agua.Scale = new Vector3(25f, 1f, 25f);
             agua.Position = new Vector3(0f, 0f, 0f);
 
-            efectoAgua = TgcShaders.loadEffect(GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Shaders\\shader_agua.fx");
+            efectoAgua = TgcShaders.loadEffect(GuiController.Instance.AlumnoEjemplosMediaDir + "shader_agua.fx");
             agua.Effect = efectoAgua;
             agua.Technique = "RenderAgua";
 
@@ -126,12 +139,13 @@ namespace AlumnoEjemplos.Quicksort
             barcoEnemigo = new BarcoBot(100, 25,100, ACELERACION, 20, meshBot, 0.05,barcoPrincipal,loader);
             barcoPrincipal.BarcoEnemigo = barcoEnemigo;
             //Camara en tercera persona focuseada en el barco (canoa) 
-            //GuiController.Instance.ThirdPersonCamera.Enable = true;
-            //GuiController.Instance.ThirdPersonCamera.setCamera(mainMesh.Position, 200, 300);
+            GuiController.Instance.ThirdPersonCamera.Enable = true;
+            GuiController.Instance.ThirdPersonCamera.setCamera(mainMesh.Position, 200, 300);
+            GuiController.Instance.RotCamera.Enable = false;
 
 
             //PARA DESARROLLO DEL ESCENARIO ES MEJOR MOVERSE CON ESTA CAMARA
-            GuiController.Instance.FpsCamera.Enable = true;
+            //GuiController.Instance.FpsCamera.Enable = true;
 
             //Carpeta de archivos Media del alumno
             //string alumnoMediaFolder = GuiController.Instance.AlumnoEjemplosMediaDir;
@@ -163,6 +177,12 @@ namespace AlumnoEjemplos.Quicksort
             barcoPrincipal.Movimiento(elapsedTime);
             barcoEnemigo.Movimiento(elapsedTime);
 
+            if (g_pCubeMapAgua == null)
+            {
+                CrearEnvMapAgua();
+                efectoAgua.SetValue("g_txCubeMapAgua", g_pCubeMapAgua);
+            }
+
 
             efectoAgua.SetValue("g_vLightPos", new Vector4(g_LightPos.X, g_LightPos.Y, g_LightPos.Z, 1));
             efectoAgua.SetValue("g_vLightDir", new Vector4(g_LightDir.X, g_LightDir.Y, g_LightDir.Z, 1));
@@ -170,6 +190,7 @@ namespace AlumnoEjemplos.Quicksort
             efectoAgua.SetValue("g_mViewLightProj", g_LightView);
             efectoAgua.SetValue("time", time);
             efectoAgua.SetValue("aux_Tex", textura);
+            efectoAgua.SetValue("texDiffuseMap",diffuseMapTexture);
 
             //Hacer que la camara siga al personaje en su nueva posicion
             GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
@@ -199,7 +220,17 @@ namespace AlumnoEjemplos.Quicksort
             checkearVidas(barcoPrincipal);
                 //Dibujamos la escena
                 escena.renderAll();
+                Blend ant_src = d3dDevice.RenderState.SourceBlend;
+                Blend ant_dest = d3dDevice.RenderState.DestinationBlend;
+                bool ant_alpha = d3dDevice.RenderState.AlphaBlendEnable;
+                d3dDevice.RenderState.AlphaBlendEnable = true;
+                d3dDevice.RenderState.SourceBlend = Blend.SourceColor;
+                d3dDevice.RenderState.DestinationBlend = Blend.InvSourceColor;
                 agua.render();
+                d3dDevice.RenderState.SourceBlend = ant_src;
+                d3dDevice.RenderState.DestinationBlend = ant_dest;
+                d3dDevice.RenderState.AlphaBlendEnable = ant_alpha;
+                //agua.render();
 
                 skyBox.render();
 
@@ -224,6 +255,96 @@ namespace AlumnoEjemplos.Quicksort
             escena.disposeAll();
             mainMesh.dispose();
             meshBot.dispose();
+        }
+
+        public void CrearEnvMapAgua()
+        {
+            // creo el enviroment map para el agua
+            Microsoft.DirectX.Direct3D.Device device = GuiController.Instance.D3dDevice;
+            g_pCubeMapAgua = new CubeTexture(device, 256, 1, Usage.RenderTarget,
+                Format.A16B16G16R16F, Pool.Default);
+            Surface pOldRT = device.GetRenderTarget(0);
+            // ojo: es fundamental que el fov sea de 90 grados.
+            // asi que re-genero la matriz de proyeccion
+            device.Transform.Projection =
+                Matrix.PerspectiveFovLH(Geometry.DegreeToRadian(90.0f),
+                    1f, near_plane, far_plane);
+            // Genero las caras del enviroment map
+            for (CubeMapFace nFace = CubeMapFace.PositiveX; nFace <= CubeMapFace.NegativeZ; ++nFace)
+            {
+                Surface pFace = g_pCubeMapAgua.GetCubeMapSurface(nFace, 0);
+                device.SetRenderTarget(0, pFace);
+                Vector3 Dir, VUP;
+                Color color;
+                switch (nFace)
+                {
+                    default:
+                    case CubeMapFace.PositiveX:
+                        // Left
+                        Dir = new Vector3(1, 0, 0);
+                        VUP = new Vector3(0, 1, 0);
+                        color = Color.Black;
+                        break;
+                    case CubeMapFace.NegativeX:
+                        // Right
+                        Dir = new Vector3(-1, 0, 0);
+                        VUP = new Vector3(0, 1, 0);
+                        color = Color.Red;
+                        break;
+                    case CubeMapFace.PositiveY:
+                        // Up
+                        Dir = new Vector3(0, 1, 0);
+                        VUP = new Vector3(0, 0, -1);
+                        color = Color.Gray;
+                        break;
+                    case CubeMapFace.NegativeY:
+                        // Down
+                        Dir = new Vector3(0, -1, 0);
+                        VUP = new Vector3(0, 0, 1);
+                        color = Color.Yellow;
+                        break;
+                    case CubeMapFace.PositiveZ:
+                        // Front
+                        Dir = new Vector3(0, 0, 1);
+                        VUP = new Vector3(0, 1, 0);
+                        color = Color.Green;
+                        break;
+                    case CubeMapFace.NegativeZ:
+                        // Back
+                        Dir = new Vector3(0, 0, -1);
+                        VUP = new Vector3(0, 1, 0);
+                        color = Color.Blue;
+                        break;
+                }
+
+                Vector3 Pos = agua.Position;
+                if (nFace == CubeMapFace.NegativeY)
+                    Pos.Y += 2000;
+
+                device.Transform.View = Matrix.LookAtLH(Pos, Pos + Dir, VUP);
+                device.Clear(ClearFlags.Target | ClearFlags.ZBuffer, color, 1.0f, 0);
+                //device.BeginScene();
+                //Renderizar: solo algunas cosas:
+                /*if (nFace == CubeMapFace.NegativeY)
+                {
+                    //Renderizar terreno
+                    terrain.render();
+                }
+                else
+                {
+                    //Renderizar SkyBox
+                    skyBox.render();
+                    // dibujo el bosque
+                    foreach (TgcMesh instance in bosque)
+                        instance.render();
+                }*/
+                //string fname = string.Format("face{0:D}.bmp", nFace);
+                //SurfaceLoader.Save(fname, ImageFileFormat.Bmp, pFace);
+
+                //device.EndScene();
+            }
+            // restuaro el render target
+            device.SetRenderTarget(0, pOldRT);
         }
 
 

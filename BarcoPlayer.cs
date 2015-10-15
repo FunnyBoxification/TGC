@@ -11,6 +11,7 @@ using TgcViewer.Utils.TgcSceneLoader;
 using TgcViewer.Utils.Input;
 using Microsoft.DirectX.DirectInput;
 using TgcViewer.Utils.Terrain;
+using TgcViewer.Utils.TgcGeometry;
 
 namespace AlumnoEjemplos.Quicksort
 {
@@ -28,6 +29,7 @@ namespace AlumnoEjemplos.Quicksort
             //Calcular proxima posicion de personaje segun Input
            
             TgcD3dInput d3dInput = GuiController.Instance.D3dInput;
+            bool moving = false;
             
 
             //Adelante
@@ -35,6 +37,7 @@ namespace AlumnoEjemplos.Quicksort
             {
                 
                  this.acelerar();
+                 moving = true;
                 
                
             }
@@ -43,6 +46,7 @@ namespace AlumnoEjemplos.Quicksort
             if (d3dInput.keyDown(Key.S))
             {
                 this.desacelerar();
+                moving = true;
                
                 
             }
@@ -51,6 +55,7 @@ namespace AlumnoEjemplos.Quicksort
             if (d3dInput.keyDown(Key.D) && VelocidadMov > 15)
             {
                 this.rotar(1);
+                moving = true;
                
                 
             }
@@ -59,6 +64,7 @@ namespace AlumnoEjemplos.Quicksort
             if (d3dInput.keyDown(Key.A) && VelocidadMov > 15)
             {
                 this.rotar(-1);
+                moving = true;
                
                 
             }
@@ -85,7 +91,7 @@ namespace AlumnoEjemplos.Quicksort
             }
 
             //Si hubo desplazamiento
-            //if (moving)
+            if (moving)
             {
 
                 //Aplicar movimiento hacia adelante o atras segun la orientacion actual del Mesh
@@ -94,6 +100,31 @@ namespace AlumnoEjemplos.Quicksort
                 //La velocidad de movimiento tiene que multiplicarse por el elapsedTime para hacerse independiente de la velocida de CPU
                 //Ver Unidad 2: Ciclo acoplado vs ciclo desacoplado
                 this.Mesh.moveOrientedY((float)VelocidadMov * elapsedTime);
+
+                bool collide = false;
+      
+                    TgcCollisionUtils.BoxBoxResult result = TgcCollisionUtils.classifyBoxBox(this.Mesh.BoundingBox, BarcoEnemigo.Mesh.BoundingBox);
+                    if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
+                    {
+                        collide = true;
+                    }
+                    foreach(TgcMesh mesh in EjemploAlumno.getEscenaMeshes() ) {
+
+                    result = TgcCollisionUtils.classifyBoxBox(this.Mesh.BoundingBox, mesh.BoundingBox);
+                    if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
+                    {
+                        collide = true;
+                    }
+                    }
+        
+
+
+
+                //Si hubo colision, restaurar la posicion anterior
+                if (collide)
+                {
+                    this.Mesh.Position = lastPos;
+                }
             }
         }
 
