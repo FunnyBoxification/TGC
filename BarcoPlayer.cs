@@ -16,7 +16,7 @@ using TgcViewer.Utils.TgcGeometry;
 namespace AlumnoEjemplos.Quicksort
 {
     class BarcoPlayer : Barco {
-        int cooldown = 0;
+        float cooldown = 0;
         
 
         public BarcoPlayer(int vida, int danio, float velocidad,float aceleracion, float rotacion, TgcMesh mesh, double pot, TgcSceneLoader bm) : base (vida, danio, velocidad, rotacion, mesh,pot,bm)
@@ -29,7 +29,7 @@ namespace AlumnoEjemplos.Quicksort
             //Calcular proxima posicion de personaje segun Input
            
             TgcD3dInput d3dInput = GuiController.Instance.D3dInput;
-            bool moving = false;
+            //bool moving = false;
             
 
             //Adelante
@@ -37,7 +37,7 @@ namespace AlumnoEjemplos.Quicksort
             {
                 
                  this.acelerar();
-                 moving = true;
+                 //moving = true;
                 
                
             }
@@ -46,7 +46,7 @@ namespace AlumnoEjemplos.Quicksort
             if (d3dInput.keyDown(Key.S))
             {
                 this.desacelerar();
-                moving = true;
+                //moving = true;
                
                 
             }
@@ -55,7 +55,7 @@ namespace AlumnoEjemplos.Quicksort
             if (d3dInput.keyDown(Key.D) && VelocidadMov > 15)
             {
                 this.rotar(1);
-                moving = true;
+                //moving = true;
                
                 
             }
@@ -64,21 +64,19 @@ namespace AlumnoEjemplos.Quicksort
             if (d3dInput.keyDown(Key.A) && VelocidadMov > 15)
             {
                 this.rotar(-1);
-                moving = true;
+                //moving = true;
                
                 
             }
 
-            if (d3dInput.keyDown(Key.R) && cooldown < 1)
+            if (d3dInput.keyDown(Key.R) && cooldown <= 0)
             {
                 this.dispararBala();
-                cooldown = 400;
+                cooldown = 5;
 
 
-            }
-            else
-            {
-                cooldown -= 1;
+            }else{
+                cooldown = cooldown - 1 * elapsedTime;
             }
 
             //Si hubo rotacion
@@ -91,7 +89,7 @@ namespace AlumnoEjemplos.Quicksort
             }
 
             //Si hubo desplazamiento
-            if (moving)
+           
             {
 
                 //Aplicar movimiento hacia adelante o atras segun la orientacion actual del Mesh
@@ -107,6 +105,9 @@ namespace AlumnoEjemplos.Quicksort
                     if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
                     {
                         collide = true;
+                        Vida = 0;
+                        BarcoEnemigo.Vida = 0;
+                        
                     }
                     /*foreach(TgcMesh mesh in EjemploAlumno.getEscenaMeshes() ) {
 
@@ -124,6 +125,10 @@ namespace AlumnoEjemplos.Quicksort
                 if (collide)
                 {
                     this.Mesh.Position = lastPos;
+                    if (VelocidadMov > 0)
+                    {
+                        VelocidadMov = 0;
+                    }
                 }
             }
         }

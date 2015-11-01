@@ -19,8 +19,8 @@ namespace AlumnoEjemplos.Quicksort
     public class EjemploAlumno : TgcExample
     {
 
-        const float VELOCIDAD_MOVIMIENTO = 150f;
-        const float VELOCIDAD_ROTACION = 25f;
+        const float VELOCIDAD_MOVIMIENTO = 125f;
+        const float VELOCIDAD_ROTACION = 20f;
         const float ACELERACION = 2f;
 
         SmartTerrain oceano;
@@ -141,12 +141,14 @@ namespace AlumnoEjemplos.Quicksort
             
 
             barcoPrincipal = new BarcoPlayer(100, 20, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh,0.05,loader);
-            barcoEnemigo = new BarcoBot(100, 25,100, ACELERACION, 20, meshBot, 0.05,barcoPrincipal,loader);
+            barcoEnemigo = new BarcoBot(100, 25,100, ACELERACION, 18, meshBot, 0.05,barcoPrincipal,loader);
             barcoPrincipal.BarcoEnemigo = barcoEnemigo;
             //Camara en tercera persona focuseada en el barco (canoa) 
-           // GuiController.Instance.ThirdPersonCamera.Enable = true;
-            //GuiController.Instance.ThirdPersonCamera.setCamera(mainMesh.Position, 200, 300);
-            //GuiController.Instance.RotCamera.Enable = false;
+
+            GuiController.Instance.ThirdPersonCamera.Enable = true;
+            GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 200, 300);
+            GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
+            GuiController.Instance.RotCamera.Enable = false;
 
 
             //PARA DESARROLLO DEL ESCENARIO ES MEJOR MOVERSE CON ESTA CAMARA
@@ -198,7 +200,9 @@ namespace AlumnoEjemplos.Quicksort
             efectoAgua.SetValue("texDiffuseMap",diffuseMapTexture);
 
             //Hacer que la camara siga al personaje en su nueva posicion
+           // GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
             GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
+            
 
             //Dibujar objeto principal
             //Siempre primero hacer todos los cálculos de lógica e input y luego al final dibujar todo (ciclo update-render)
@@ -206,7 +210,7 @@ namespace AlumnoEjemplos.Quicksort
             barcoEnemigo.Mesh.render();
             foreach (var bala in barcoPrincipal.balas)
             {
-                if (((bala.Mesh.Position) - (barcoPrincipal.Mesh.Position)).Length() < 200)
+                if (bala.Mesh.Position.Y >0)
                 {
                     bala.Mover(elapsedTime);
                     bala.Mesh.render();
@@ -217,8 +221,11 @@ namespace AlumnoEjemplos.Quicksort
                
             foreach (var bala in barcoEnemigo.balas)
                 {
-                    bala.Mover(elapsedTime);
-                    bala.Mesh.render();
+                    if (bala.Mesh.Position.Y > 0)
+                    {
+                        bala.Mover(elapsedTime);
+                        bala.Mesh.render();
+                    }
                 }
 
             checkearVidas(barcoEnemigo);

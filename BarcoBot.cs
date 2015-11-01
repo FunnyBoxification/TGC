@@ -101,7 +101,7 @@ namespace AlumnoEjemplos.Quicksort
                 //Rotar personaje y la camara, hay que multiplicarlo por el tiempo transcurrido para no atarse a la velocidad el hardware
                 float rotAngle = Geometry.DegreeToRadian((float)VelocidadRot * elapsedTime);
                 this.Mesh.rotateY(rotAngle);
-                GuiController.Instance.ThirdPersonCamera.rotateY(rotAngle);
+                //GuiController.Instance.ThirdPersonCamera.rotateY(rotAngle);
             }
 
             //Si hubo desplazamiento
