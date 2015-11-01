@@ -204,7 +204,7 @@ namespace AlumnoEjemplos.Quicksort
             barcoEnemigo.Mesh.render();
             foreach (var bala in barcoPrincipal.balas)
             {
-                if (((bala.Mesh.Position) - (barcoPrincipal.Mesh.Position)).Length() < 200)
+                if (bala.Mesh.Position.Y >0)
                 {
                     bala.Mover(elapsedTime);
                     bala.Mesh.render();
@@ -215,8 +215,11 @@ namespace AlumnoEjemplos.Quicksort
                
             foreach (var bala in barcoEnemigo.balas)
                 {
-                    bala.Mover(elapsedTime);
-                    bala.Mesh.render();
+                    if (bala.Mesh.Position.Y > 0)
+                    {
+                        bala.Mover(elapsedTime);
+                        bala.Mesh.render();
+                    }
                 }
 
             checkearVidas(barcoEnemigo);
