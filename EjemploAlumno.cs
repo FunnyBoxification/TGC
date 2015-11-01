@@ -6,12 +6,13 @@ using TgcViewer;
 using Microsoft.DirectX.Direct3D;
 using System.Drawing;
 using Microsoft.DirectX;
-using TgcViewer.Utils.Modifiers;
+using TgcViewer.Utils.Modifiers;    
 using TgcViewer.Utils.TgcSceneLoader;
 using TgcViewer.Utils.Input;
 using Microsoft.DirectX.DirectInput;
 using TgcViewer.Utils.Terrain;
 using TgcViewer.Utils.Shaders;
+using Examples.TerrainEditor;
 
 namespace AlumnoEjemplos.Quicksort 
 {
@@ -21,6 +22,8 @@ namespace AlumnoEjemplos.Quicksort
         const float VELOCIDAD_MOVIMIENTO = 150f;
         const float VELOCIDAD_ROTACION = 25f;
         const float ACELERACION = 2f;
+
+        SmartTerrain oceano;
 
         BarcoPlayer barcoPrincipal;
        
@@ -83,11 +86,13 @@ namespace AlumnoEjemplos.Quicksort
             b = (Bitmap)Bitmap.FromFile(GuiController.Instance.ExamplesMediaDir
                     + "Shaders\\BumpMapping_DiffuseMap.jpg");
             diffuseMapTexture = Texture.FromBitmap(d3dDevice, b, Usage.None, Pool.Managed);
-            
-            
+
+            oceano = new SmartTerrain();
+            oceano.loadHeightmap(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg", 20.00f, 0.0f, new Vector3(0, 0, 0));
+            oceano.loadTexture(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg");
             
             TgcSceneLoader loader = new TgcSceneLoader();
-            escena = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Scenes\\Isla\\Isla-TgcScene.xml");
+            //escena = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Scenes\\Isla\\Isla-TgcScene.xml");
             
             //Textura del skybox
             string texturesPath = GuiController.Instance.ExamplesMediaDir + "Texturas\\Quake\\SkyBox LostAtSeaDay\\";
@@ -124,14 +129,14 @@ namespace AlumnoEjemplos.Quicksort
             meshBot = scene4.Meshes[0];
             meshBot.Position = new Vector3(-400f,0f,400f);
 
-            TgcScene scene3 = loader.loadSceneFromFile(GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Media\\Piso\\Agua-TgcScene.xml");
-            agua = scene3.Meshes[0];
-            agua.Scale = new Vector3(25f, 1f, 25f);
-            agua.Position = new Vector3(0f, 0f, 0f);
+            //TgcScene scene3 = loader.loadSceneFromFile(GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Media\\Piso\\Agua-TgcScene.xml");
+            //agua = scene3.Meshes[0];
+            //agua.Scale = new Vector3(25f, 1f, 25f);
+            //agua.Position = new Vector3(0f, 0f, 0f);
 
             efectoAgua = TgcShaders.loadEffect(GuiController.Instance.AlumnoEjemplosMediaDir + "shader_agua.fx");
-            agua.Effect = efectoAgua;
-            agua.Technique = "RenderAgua";
+            oceano.Effect = efectoAgua;
+            oceano.Technique = "RenderAgua";
 
             
 
@@ -139,13 +144,13 @@ namespace AlumnoEjemplos.Quicksort
             barcoEnemigo = new BarcoBot(100, 25,100, ACELERACION, 20, meshBot, 0.05,barcoPrincipal,loader);
             barcoPrincipal.BarcoEnemigo = barcoEnemigo;
             //Camara en tercera persona focuseada en el barco (canoa) 
-            GuiController.Instance.ThirdPersonCamera.Enable = true;
-            GuiController.Instance.ThirdPersonCamera.setCamera(mainMesh.Position, 200, 300);
-            GuiController.Instance.RotCamera.Enable = false;
+           // GuiController.Instance.ThirdPersonCamera.Enable = true;
+            //GuiController.Instance.ThirdPersonCamera.setCamera(mainMesh.Position, 200, 300);
+            //GuiController.Instance.RotCamera.Enable = false;
 
 
             //PARA DESARROLLO DEL ESCENARIO ES MEJOR MOVERSE CON ESTA CAMARA
-            //GuiController.Instance.FpsCamera.Enable = true;
+            GuiController.Instance.FpsCamera.Enable = true;
 
             //Carpeta de archivos Media del alumno
             //string alumnoMediaFolder = GuiController.Instance.AlumnoEjemplosMediaDir;
@@ -219,14 +224,15 @@ namespace AlumnoEjemplos.Quicksort
             checkearVidas(barcoEnemigo);
             checkearVidas(barcoPrincipal);
                 //Dibujamos la escena
-                escena.renderAll();
+                //escena.renderAll();
                 Blend ant_src = d3dDevice.RenderState.SourceBlend;
                 Blend ant_dest = d3dDevice.RenderState.DestinationBlend;
                 bool ant_alpha = d3dDevice.RenderState.AlphaBlendEnable;
                 d3dDevice.RenderState.AlphaBlendEnable = true;
                 d3dDevice.RenderState.SourceBlend = Blend.SourceColor;
                 d3dDevice.RenderState.DestinationBlend = Blend.InvSourceColor;
-                agua.render();
+                //agua.render();
+                oceano.render();
                 d3dDevice.RenderState.SourceBlend = ant_src;
                 d3dDevice.RenderState.DestinationBlend = ant_dest;
                 d3dDevice.RenderState.AlphaBlendEnable = ant_alpha;
@@ -252,7 +258,7 @@ namespace AlumnoEjemplos.Quicksort
         /// </summary>
         public override void close()
         {
-            escena.disposeAll();
+            //escena.disposeAll();
             mainMesh.dispose();
             meshBot.dispose();
         }
@@ -317,7 +323,7 @@ namespace AlumnoEjemplos.Quicksort
                         break;
                 }
 
-                Vector3 Pos = agua.Position;
+                Vector3 Pos = new Vector3(0, 0, 0);//agua.Position;
                 if (nFace == CubeMapFace.NegativeY)
                     Pos.Y += 2000;
 

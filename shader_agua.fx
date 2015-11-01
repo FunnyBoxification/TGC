@@ -101,61 +101,46 @@ sampler_state
     AddressV = Clamp;
 };
 
-
-VS_OUTPUT VSAgua( float4 Pos : POSITION,
-             float2 Texcoord : TEXCOORD0,
-             float3 normal : NORMAL)
+struct VS_OUTPUT2 
 {
-	VS_OUTPUT Output;
-	
-	float k = 3;
-	float vel = -3;
-	float sinarg = (5+sin( k*(Pos.x+time*vel))/2 + 5+cos(k*(Pos.y+time*vel))/2); //mul(Pos.x, 2.5) + time;
-	
-	Pos.y = mul(2.0, sin(sinarg));
+   float4 Position :        POSITION0;
+   float2 Texcoord :        TEXCOORD0;
+   float3 Norm :			TEXCOORD1;		// Normales
+   float3 Pos :   			TEXCOORD2;		// Posicion real 3d
+};
+ 
+ VS_OUTPUT2 VSAgua( float4 Pos:POSITION0,float3 Normal:NORMAL, float2 Texcoord:TEXCOORD0)
+{
+
+   float A = 5;
+	float L = 50;	// wavelength
+	float w = 5*3.1416/L;
+	float Q = 0.5;
+   float3 P0 = Pos.xyz;
+   //float3 D = float3(1,1,0);
+  // float dotD = dot(P0.xy, D);
+	float C = cos(0.005*P0.x - time);
+	float S = sin(0.005*P0.z -  time);
+   VS_OUTPUT2 Output;
+   
+   Pos.x = P0.x;
+   Pos.y = P0.y + Q*A*(S+C);//*D.y; //C; //P0.y * 2 * ( cos(0.005*P0.x - time) + sin(0.005 * P0.z - time) );
+   Pos.z = P0.z; //+ Q*A*S*D.y;
+   //Proyectar posicion
+   Output.Position = mul( Pos, matWorldViewProj);
+   //Propago  las coord. de textura 
+   Output.Texcoord  = Texcoord;
+   // Calculo la posicion real
+   Output.Pos = mul(Pos,matWorld).xyz;
+   // Transformo la normal y la normalizo
+	//Output.Norm = normalize(mul(Normal,matInverseTransposeWorld));
+	Output.Norm = normalize(mul(Normal,matWorld));
+   return( Output );
+   
+}
 
 
-	float4 VertexPositionWS = mul( Pos,matWorld );
-	
-	Output.wsPos = VertexPositionWS.xyz;		// de paso devuelvo la Posicion en worldspace
-    // y de paso propago la posicion del vertice en el espacio de proyeccion de la luz
-   Output.vPosLight = mul( VertexPositionWS, g_mViewLightProj );
-	
-	float3 E = fvEyePosition.xyz - Output.wsPos;
-	
-	// calculo la tg y la binormal 
-	//float3 up = float3(0,0,1);
-	//float3 tangent = cross(up,normal);
-	//float3 binormal = cross(normal,tangent);
-	
-	normal = float3(0,1,0);
-	float3 tangent = float3(0,0,1);
-	float3 binormal = float3(1,0,0);
-	
-	float3x3 tangentToWorldSpace;
-	tangentToWorldSpace[0] = mul( tangent, matWorld );
-	tangentToWorldSpace[1] = mul( binormal, matWorld);
-	tangentToWorldSpace[2] = mul( normal, matWorld);
-
-	float3x3 worldToTangentSpace = transpose(tangentToWorldSpace);
-
-	// proyecto
-    Output.oPos = mul( Pos, matWorldViewProj );
-
-    // Propago la textura
-    Output.Tex = Texcoord;
-
-
-	// devuelvo la pos. del ojo expresados en tangent space: 
-	Output.tsEye = mul( E, worldToTangentSpace );
-	// devuelvo la pos. del pto en tg space
-	Output.tsPos = mul( VertexPositionWS.xyz,worldToTangentSpace);
-	
-	return( Output );
- }
-
-
-float4 PSAgua(	float3 Pos: POSITION,
+float4 PSAgua(	float3 oPos: POSITION,
 				float2 Texcoord:	TEXCOORD0, 				
 				float3 tsEye:		TEXCOORD1,		// estan en tangent space!
 				float3 tsPos:		TEXCOORD2,

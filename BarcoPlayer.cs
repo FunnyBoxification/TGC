@@ -108,14 +108,14 @@ namespace AlumnoEjemplos.Quicksort
                     {
                         collide = true;
                     }
-                    foreach(TgcMesh mesh in EjemploAlumno.getEscenaMeshes() ) {
+                    /*foreach(TgcMesh mesh in EjemploAlumno.getEscenaMeshes() ) {
 
                     result = TgcCollisionUtils.classifyBoxBox(this.Mesh.BoundingBox, mesh.BoundingBox);
                     if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
                     {
                         collide = true;
                     }
-                    }
+                    }*/
         
 
 
