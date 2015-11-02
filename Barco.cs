@@ -44,11 +44,20 @@ namespace AlumnoEjemplos.Quicksort
             balas = new List<Bala>();
         }
 
-        public void dispararBala()
+        public void dispararBala(int tipobala, int direccion)
         {
             TgcMesh balaMesh;
-            TgcScene scene2 = Loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Armas\\Hacha\\Hacha-TgcScene.xml");
-            balaMesh = scene2.Meshes[0];
+            if (tipobala == 1)
+            {
+                TgcScene scene2 = Loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Armas\\Hacha\\Bala-TgcScene.xml");
+                balaMesh = scene2.Meshes[0];
+            }
+            else
+            {
+                TgcScene scene2 = Loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Armas\\Hacha\\Hacha-TgcScene.xml");
+                balaMesh = scene2.Meshes[0];
+            }
+            
             var pos = this.Mesh.Position;
             var rot = this.Mesh.Rotation;
             Vector3 a = new Vector3(0,10,0);
@@ -56,8 +65,16 @@ namespace AlumnoEjemplos.Quicksort
             
             balaMesh.Rotation = this.Mesh.Rotation;
             //dispara a 90 grados
-            balaMesh.rotateY(Geometry.DegreeToRadian(270));
-            var bala = new Bala(balaMesh, Danio,BarcoEnemigo);
+            if (direccion == 0)
+            {
+                balaMesh.rotateY(Geometry.DegreeToRadian(270));
+            }
+            else
+            {
+                balaMesh.rotateY(Geometry.DegreeToRadian(90));
+            }
+
+            var bala = new Bala(balaMesh, Danio,BarcoEnemigo, tipobala);
             balas.Add(bala);
         }
 

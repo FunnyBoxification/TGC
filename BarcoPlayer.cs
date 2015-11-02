@@ -69,13 +69,21 @@ namespace AlumnoEjemplos.Quicksort
                 
             }
 
-            if (d3dInput.keyDown(Key.R) && cooldown <= 0)
+            if (d3dInput.keyDown(Key.E) && cooldown <= 0)
             {
-                this.dispararBala();
-                cooldown = 5;
+                this.dispararBala(0,1);
+                cooldown = 4;
 
 
-            }else{
+            }
+            else if (d3dInput.keyDown(Key.Q) && cooldown <= 0)
+            {
+                this.dispararBala(0,0);
+                cooldown = 4;
+
+
+            }else
+            {
                 cooldown = cooldown - 1 * elapsedTime;
             }
 

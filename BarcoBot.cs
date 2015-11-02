@@ -17,7 +17,7 @@ namespace AlumnoEjemplos.Quicksort
 {
     class BarcoBot : Barco
     {
-        int cooldown = 0;
+        float cooldown = 0;
         
         public Vector3 LastPos { get; set; }
 
@@ -55,7 +55,7 @@ namespace AlumnoEjemplos.Quicksort
 
             
             // distancia para aproximarse al barco
-            if( distancia() > 200){
+            if( distancia() > 500){
                  acelerar();
                 var vect = new Vector3(FastMath.Sin(Mesh.Rotation.Y), 0 ,FastMath.Cos(Mesh.Rotation.Y));
                 var vect2 = new Vector3(FastMath.Sin(BarcoEnemigo.Mesh.Rotation.Y), 0, FastMath.Cos(BarcoEnemigo.Mesh.Rotation.Y));
@@ -81,15 +81,78 @@ namespace AlumnoEjemplos.Quicksort
                 }
 
             }
-            else
+            else if (distancia() < 200)
+            {
+                
+                var vect = new Vector3(FastMath.Sin(Mesh.Rotation.Y), 0, FastMath.Cos(Mesh.Rotation.Y));
+                //var vect2 = new Vector3(FastMath.Sin(BarcoEnemigo.Mesh.Rotation.Y), 0, FastMath.Cos(BarcoEnemigo.Mesh.Rotation.Y));
+                
+                Vector3 vectnDireccion = Vector3.Normalize(BarcoEnemigo.Mesh.Position - this.Mesh.Position);
+                //Vector3 vectnMio = Vector3.Normalize(this.Mesh.Rotation);
+                //var cdot = Vector3.Dot(vectnDireccion, vectnMio);                
+                //var angulo = Geometry.RadianToDegree((float)Math.Acos(Vector3.Dot(vectnDireccion, vect)));
+
+                //var a =VDot(vectEnem.Normalize(), vectMio.Normalize());
+                if (!(Vector3.Dot(vect, vectnDireccion) == 1))
+                {
+
+                    if (Vector3.Cross(vect, vectnDireccion).Y > 0 && VelocidadMov > 15)//el barco esta a la izq
+                    {
+
+                        this.rotar(-1); //roto al revez
+                    }
+                    if (Vector3.Cross(vect, vectnDireccion).Y< 0 && VelocidadMov> 15) //el barco esta a la derecha o atras
+                    {
+                        this.rotar(1); //roto al revez
+                    }
+                    
+
+                }
+                acelerar();
+            }else
             {
                 if(cooldown < 1){
-                frenar();
-                dispararBala();
-                cooldown = 300;
+                    frenar();
+
+                    var vect = new Vector3(FastMath.Sin(Mesh.Rotation.Y), 0, FastMath.Cos(Mesh.Rotation.Y));
+                    Vector3 vectnDireccion = Vector3.Normalize(BarcoEnemigo.Mesh.Position - this.Mesh.Position);
+
+                    if (!(Vector3.Dot(vect, vectnDireccion) == 1))
+                    {
+                        if (Vector3.Cross(vect, vectnDireccion).Y > 0)//el barco esta a la izq
+                        {
+                            dispararBala(1, 1); //dispara der
+                        }
+                        if (Vector3.Cross(vect, vectnDireccion).Y < 0) //el barco esta a la derecha o atras
+                        {
+                            dispararBala(1, 0); //dispara izq
+                        }
+                    }       
+                    cooldown = 5;
                 }else
                 {
-                 cooldown -=1;
+                 cooldown -= elapsedTime*1;
+                 var vect = new Vector3(FastMath.Sin(Mesh.Rotation.Y), 0, FastMath.Cos(Mesh.Rotation.Y));
+                 Vector3 vectnDireccion = Vector3.Normalize(BarcoEnemigo.Mesh.Position - this.Mesh.Position);
+                 var angulo = (float)Math.Acos(Vector3.Dot(vectnDireccion, vect));
+
+                 
+                     //if (Vector3.Cross(vect, vectnDireccion).Y > 0)//el barco esta a la izq
+                     //{
+                         if (Math.Cos(angulo) > 0)
+                         {
+                             this.Mesh.rotateY(Geometry.DegreeToRadian((float)10 * elapsedTime));
+                         }
+                         if (Math.Cos(angulo) < 0)
+                         {
+                             this.Mesh.rotateY(Geometry.DegreeToRadian((float)-10 * elapsedTime));
+                         }
+                     //}
+                     //if (Vector3.Cross(vect, vectnDireccion).Y < 0) //el barco esta a la derecha o atras
+                     //{
+                     //    this.Mesh.rotateY(Geometry.DegreeToRadian((float)-1 * elapsedTime)); //dispara izq
+                     //}
+                        
                 }
             }
 

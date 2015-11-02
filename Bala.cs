@@ -22,15 +22,17 @@ namespace AlumnoEjemplos.Quicksort
         public double alturaMax { get; set; }
         public bool activa { get; set; }
         public bool subiendo { get; set; }
-        public Bala(TgcMesh mesh, int dam,Barco barcoEnem)
+        public int tipoBala { get; set; }
+        public Bala(TgcMesh mesh, int dam,Barco barcoEnem, int tipo)
         {
 
             Mesh = mesh;
             danio = dam;
             BarcoEnemigo = barcoEnem;
-            alturaMax = 50;
+            alturaMax = 35;
             activa = true;
             subiendo = true;
+            tipoBala = tipo;
         }
         public int danio { get; set; }
         public TgcMesh Mesh { get; set; }
@@ -51,21 +53,24 @@ namespace AlumnoEjemplos.Quicksort
                     col = true;
                 }
             }
-            foreach (TgcMesh mesh in EjemploAlumno.getEscenaMeshes())
+            //foreach (TgcMesh mesh in EjemploAlumno.getEscenaMeshes())
+            //{
+
+            //     result = TgcCollisionUtils.classifyBoxBox(this.Mesh.BoundingBox, mesh.BoundingBox);
+            //    if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
+            //    {
+            //        activa = false;
+            //    }
+            //}
+
+            if (tipoBala == 0)
             {
-
-                 result = TgcCollisionUtils.classifyBoxBox(this.Mesh.BoundingBox, mesh.BoundingBox);
-                if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
-                {
-                    activa = false;
-                }
+                this.Mesh.rotateX((float)10 * elapsedTime);
             }
-
-            this.Mesh.rotateX((float)10 * elapsedTime);
             this.Mesh.moveOrientedY((float) 120 *elapsedTime);
             if (subiendo)
             {
-                this.Mesh.move(new Vector3(0, elapsedTime * 10f, 0));
+                this.Mesh.move(new Vector3(0, elapsedTime * 12.5f, 0));
                 if(Mesh.Position.Y > alturaMax){
                     subiendo = false;
                 }
@@ -73,7 +78,7 @@ namespace AlumnoEjemplos.Quicksort
             }
             else
             {
-                this.Mesh.move( new Vector3(0, - elapsedTime*10f, 0));
+                this.Mesh.move( new Vector3(0, - elapsedTime*12.5f, 0));
 
             }
 
