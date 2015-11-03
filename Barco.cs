@@ -129,5 +129,41 @@ namespace AlumnoEjemplos.Quicksort
             }
             
         }
+
+        public void colocarAltura(float time)
+        {
+            double y = Calculo(time);
+
+            Mesh.move(0, (float)y*10, 0);
+        }
+        public void volverAltura(float time)
+        {
+            double y = Calculo( time);
+
+            Mesh.move(0, -(float)y*10, 0);
+        }
+
+        private double Calculo(float time)
+        {
+            //pruebo altura de ola
+            double A = 5;
+            double L = 50;	// wavelength
+            double w = 5f * 3.1416f / L;
+            double Q = 0.5f;
+            double x = Mesh.Position.X;
+            double z = Mesh.Position.Z;
+            double y = Mesh.Position.Y;
+            //float3 D = float3(1,1,0);
+            // float dotD = dot(P0.xy, D);
+
+            double C = Math.Cos(0.005 * x -time);
+            double S = Math.Sin(0.005 * z -time);
+
+
+
+            y = Q * A * (S + C);
+            return y;
+        }
+
     }
 }

@@ -141,11 +141,11 @@ namespace AlumnoEjemplos.Quicksort
                      //{
                          if (Math.Cos(angulo) > 0)
                          {
-                             this.Mesh.rotateY(Geometry.DegreeToRadian((float)10 * elapsedTime));
+                             this.Mesh.rotateY(Geometry.DegreeToRadian((float)-6 * elapsedTime));
                          }
                          if (Math.Cos(angulo) < 0)
                          {
-                             this.Mesh.rotateY(Geometry.DegreeToRadian((float)-10 * elapsedTime));
+                             this.Mesh.rotateY(Geometry.DegreeToRadian((float)6 * elapsedTime));
                          }
                      //}
                      //if (Vector3.Cross(vect, vectnDireccion).Y < 0) //el barco esta a la derecha o atras

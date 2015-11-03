@@ -138,6 +138,7 @@ namespace AlumnoEjemplos.Quicksort
                         VelocidadMov = 0;
                     }
                 }
+               
             }
         }
 

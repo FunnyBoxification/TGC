@@ -181,8 +181,7 @@ namespace AlumnoEjemplos.Quicksort
             g_LightDir = -g_LightPos;
             g_LightDir.Normalize();
 
-            barcoPrincipal.Movimiento(elapsedTime);
-            barcoEnemigo.Movimiento(elapsedTime);
+            
 
             if (g_pCubeMapAgua == null)
             {
@@ -206,8 +205,15 @@ namespace AlumnoEjemplos.Quicksort
 
             //Dibujar objeto principal
             //Siempre primero hacer todos los cálculos de lógica e input y luego al final dibujar todo (ciclo update-render)
+
+            barcoPrincipal.Movimiento(elapsedTime);
+            barcoEnemigo.Movimiento(elapsedTime);
+            barcoPrincipal.colocarAltura(time);
+            barcoEnemigo.colocarAltura(time);
             barcoPrincipal.Mesh.render();
             barcoEnemigo.Mesh.render();
+            barcoPrincipal.volverAltura(time);
+            barcoEnemigo.volverAltura(time);
             foreach (var bala in barcoPrincipal.balas)
             {
                 if (bala.Mesh.Position.Y >0)
