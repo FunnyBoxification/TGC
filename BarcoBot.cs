@@ -176,7 +176,7 @@ namespace AlumnoEjemplos.Quicksort
 
                 //La velocidad de movimiento tiene que multiplicarse por el elapsedTime para hacerse independiente de la velocida de CPU
                 //Ver Unidad 2: Ciclo acoplado vs ciclo desacoplado
-                this.Mesh.moveOrientedY((float)VelocidadMov * elapsedTime);
+                this.Mesh.moveOrientedY((float)VelocidadMov *boostOla()* elapsedTime);
             }
         }
     }

@@ -12,6 +12,7 @@ using TgcViewer.Utils.Input;
 using Microsoft.DirectX.DirectInput;
 using TgcViewer.Utils.Terrain;
 using TgcViewer.Utils.Shaders;
+using TgcViewer.Utils.TgcGeometry;
 
 
 namespace AlumnoEjemplos.Quicksort
@@ -158,12 +159,33 @@ namespace AlumnoEjemplos.Quicksort
 
             double C = Math.Cos(0.005 * x -time);
             double S = Math.Sin(0.005 * z -time);
-
+            
 
 
             y = Q * A * (S + C);
             return y;
         }
+
+        public float boostOla()
+        {
+            float z = FastMath.Cos(Mesh.Rotation.Y) ;
+            float x = FastMath.Sin(Mesh.Rotation.Y) ;
+            Vector3 vectDireccion = new Vector3(x, 0, z);
+            if (!(Vector3.Dot(Mesh.Rotation, vectDireccion) == 1))
+            {
+                if (Vector3.Cross(Mesh.Rotation, vectDireccion).Y < 0)//el barco esta a la izq
+                {
+                    return 1.1f; //dispara der
+                }
+                if (Vector3.Cross(Mesh.Rotation, vectDireccion).Y > 0) //el barco esta a la derecha o atras
+                {
+                    return 0.9f; //dispara izq
+                }
+                 
+            }
+            return 1;
+        }
+
 
     }
 }
