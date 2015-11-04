@@ -13,6 +13,9 @@ using Microsoft.DirectX.DirectInput;
 using TgcViewer.Utils.Terrain;
 using TgcViewer.Utils.Shaders;
 using Examples.TerrainEditor;
+using TgcViewer.Utils.Interpolation;
+using TgcViewer.Utils;
+using TgcViewer.Utils.Shaders;
 
 namespace AlumnoEjemplos.Quicksort 
 {
@@ -48,6 +51,14 @@ namespace AlumnoEjemplos.Quicksort
         Matrix g_LightView;						// matriz de view del light
         float alfa_sol;             // pos. del sol
 
+        //lluvia
+        VertexBuffer screenQuadVB;
+        Texture renderTarget2D;
+        Surface pOldRT;
+        Microsoft.DirectX.Direct3D.Effect effectlluvia;
+        TgcTexture alarmTexture;
+        InterpoladorVaiven intVaivenAlarm;
+
         public override string getCategory()
         {
             return "AlumnoEjemplos";
@@ -74,9 +85,56 @@ namespace AlumnoEjemplos.Quicksort
 
             //Device de DirectX para crear primitivas
             Microsoft.DirectX.Direct3D.Device d3dDevice = GuiController.Instance.D3dDevice;
+            
+            //Activamos el renderizado customizado. De esta forma el framework nos delega control total sobre como dibujar en pantalla
+            //La responsabilidad cae toda de nuestro lado
+            GuiController.Instance.CustomRenderEnabled = true;
 
             //Cargo la escena completa que tendria que ser la del escenario con el cielo / la del agua
             //PROXIMAMENTE, ahora cargo otro escenario
+
+            //Pruebo postprocess lluvia
+            CustomVertex.PositionTextured[] screenQuadVertices = new CustomVertex.PositionTextured[]
+		    {
+    			new CustomVertex.PositionTextured( -1, 1, 1, 0,0), 
+			    new CustomVertex.PositionTextured(1,  1, 1, 1,0),
+			    new CustomVertex.PositionTextured(-1, -1, 1, 0,1),
+			    new CustomVertex.PositionTextured(1,-1, 1, 1,1)
+    		};
+            //vertex buffer de los triangulos
+            screenQuadVB = new VertexBuffer(typeof(CustomVertex.PositionTextured),
+                    4, d3dDevice, Usage.Dynamic | Usage.WriteOnly,
+                        CustomVertex.PositionTextured.Format, Pool.Default);
+            screenQuadVB.SetData(screenQuadVertices, 0, LockFlags.None);
+
+            //Creamos un Render Targer sobre el cual se va a dibujar la pantalla
+            renderTarget2D = new Texture(d3dDevice, d3dDevice.PresentationParameters.BackBufferWidth
+                    , d3dDevice.PresentationParameters.BackBufferHeight, 1, Usage.RenderTarget,
+                        Format.X8R8G8B8, Pool.Default);
+
+
+            //Cargar shader con efectos de Post-Procesado
+            effectlluvia = TgcShaders.loadEffect(GuiController.Instance.AlumnoEjemplosMediaDir + "PostProcess.fx");
+
+            //Configurar Technique dentro del shader
+            effectlluvia.Technique = "AlarmaTechnique";
+
+            //Cargar textura que se va a dibujar arriba de la escena del Render Target
+            alarmTexture = TgcTexture.createTexture(d3dDevice, GuiController.Instance.AlumnoEjemplosMediaDir + "rain.png");
+
+            //Interpolador para efecto de variar la intensidad de la textura de alarma
+            intVaivenAlarm = new InterpoladorVaiven();
+            intVaivenAlarm.Min = 0;
+            intVaivenAlarm.Max = 2;
+            intVaivenAlarm.Speed = 10;
+            intVaivenAlarm.reset();
+
+            //Modifier para activar/desactivar efecto de alarma
+            GuiController.Instance.Modifiers.addBoolean("activar_efecto", "Activar efecto", true);
+
+            //termina post process
+
+
 
             Bitmap b = (Bitmap)Bitmap.FromFile(GuiController.Instance.ExamplesDir
                     + "Shaders\\WorkshopShaders\\Media\\Heighmaps\\" + "TerrainTexture3.jpg");
@@ -166,22 +224,71 @@ namespace AlumnoEjemplos.Quicksort
             Microsoft.DirectX.Direct3D.Device d3dDevice = GuiController.Instance.D3dDevice;
             time += elapsedTime;
 
-            /*
-            //Obtener valor de UserVar (hay que castear)
-            int valor = (int)GuiController.Instance.UserVars.getValue("variablePrueba");
+            //Cargamos el Render Targer al cual se va a dibujar la escena 3D. Antes nos guardamos el surface original
+            //En vez de dibujar a la pantalla, dibujamos a un buffer auxiliar, nuestro Render Target.
+            pOldRT = d3dDevice.GetRenderTarget(0);
+            Surface pSurf = renderTarget2D.GetSurfaceLevel(0);
+            d3dDevice.SetRenderTarget(0, pSurf);
+            d3dDevice.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.Black, 1.0f, 0);
+
+
+            //Dibujamos la escena comun, pero en vez de a la pantalla al Render Target
+            drawSceneToRenderTarget(d3dDevice, elapsedTime);
+
+            //Liberar memoria de surface de Render Target
+            pSurf.Dispose();
+
+            //Si quisieramos ver que se dibujo, podemos guardar el resultado a una textura en un archivo para debugear su resultado (ojo, es lento)
+            //TextureLoader.Save(GuiController.Instance.ExamplesMediaDir + "Shaders\\render_target.bmp", ImageFileFormat.Bmp, renderTarget2D);
+
+
+            //Ahora volvemos a restaurar el Render Target original (osea dibujar a la pantalla)
+            d3dDevice.SetRenderTarget(0, pOldRT);
+
+
+            //Luego tomamos lo dibujado antes y lo combinamos con una textura con efecto de alarma
+            drawPostProcess(d3dDevice);
             
 
-            //Obtener valores de Modifiers
-            float valorFloat = (float)GuiController.Instance.Modifiers["valorFloat"];
-            string opcionElegida = (string)GuiController.Instance.Modifiers["valorIntervalo"];
-            Vector3 valorVertice = (Vector3)GuiController.Instance.Modifiers["valorVertice"];
-            */
+        }
+
+        private void checkearVidas(Barco barco)
+        {
+            if (barco.Vida < 0)
+            {
+                barco.Mesh.setColor(Color.Red);
+            }
+        }
+
+        private void drawSceneToRenderTarget(Microsoft.DirectX.Direct3D.Device d3dDevice, float elapsedTime)
+        {
+            //Arrancamos el renderizado. Esto lo tenemos que hacer nosotros a mano porque estamos en modo CustomRenderEnabled = true
+            d3dDevice.BeginScene();
+
+
+            //Como estamos en modo CustomRenderEnabled, tenemos que dibujar todo nosotros, incluso el contador de FPS
+            GuiController.Instance.Text3d.drawText("FPS: " + HighResolutionTimer.Instance.FramesPerSecond, 0, 0, Color.Yellow);
+
+            //Tambien hay que dibujar el indicador de los ejes cartesianos
+            GuiController.Instance.AxisLines.render();
+
+            //Viejo render aqui ///
+            /*
+          //Obtener valor de UserVar (hay que castear)
+          int valor = (int)GuiController.Instance.UserVars.getValue("variablePrueba");
+            
+
+          //Obtener valores de Modifiers
+          float valorFloat = (float)GuiController.Instance.Modifiers["valorFloat"];
+          string opcionElegida = (string)GuiController.Instance.Modifiers["valorIntervalo"];
+          Vector3 valorVertice = (Vector3)GuiController.Instance.Modifiers["valorVertice"];
+          */
             alfa_sol = 1.5f;
             g_LightPos = new Vector3(2000f * (float)Math.Cos(alfa_sol), 2000f * (float)Math.Sin(alfa_sol), 0f);
             g_LightDir = -g_LightPos;
             g_LightDir.Normalize();
 
-            
+
 
             if (g_pCubeMapAgua == null)
             {
@@ -196,12 +303,12 @@ namespace AlumnoEjemplos.Quicksort
             efectoAgua.SetValue("g_mViewLightProj", g_LightView);
             efectoAgua.SetValue("time", time);
             efectoAgua.SetValue("aux_Tex", textura);
-            efectoAgua.SetValue("texDiffuseMap",diffuseMapTexture);
+            efectoAgua.SetValue("texDiffuseMap", diffuseMapTexture);
 
             //Hacer que la camara siga al personaje en su nueva posicion
-           // GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
+            // GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
             GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
-            
+
 
             //Dibujar objeto principal
             //Siempre primero hacer todos los cálculos de lógica e input y luego al final dibujar todo (ciclo update-render)
@@ -216,7 +323,7 @@ namespace AlumnoEjemplos.Quicksort
             barcoEnemigo.volverAltura(time);
             foreach (var bala in barcoPrincipal.balas)
             {
-                if (bala.Mesh.Position.Y >0)
+                if (bala.Mesh.Position.Y > 0)
                 {
                     bala.Mover(elapsedTime);
                     bala.Mesh.render();
@@ -224,45 +331,76 @@ namespace AlumnoEjemplos.Quicksort
                 }
             }
 
-               
+
             foreach (var bala in barcoEnemigo.balas)
+            {
+                if (bala.Mesh.Position.Y > 0)
                 {
-                    if (bala.Mesh.Position.Y > 0)
-                    {
-                        bala.Mover(elapsedTime);
-                        bala.Mesh.render();
-                    }
+                    bala.Mover(elapsedTime);
+                    bala.Mesh.render();
                 }
+            }
 
             checkearVidas(barcoEnemigo);
             checkearVidas(barcoPrincipal);
-                //Dibujamos la escena
-                //escena.renderAll();
-                Blend ant_src = d3dDevice.RenderState.SourceBlend;
-                Blend ant_dest = d3dDevice.RenderState.DestinationBlend;
-                bool ant_alpha = d3dDevice.RenderState.AlphaBlendEnable;
-                d3dDevice.RenderState.AlphaBlendEnable = true;
-                d3dDevice.RenderState.SourceBlend = Blend.SourceColor;
-                d3dDevice.RenderState.DestinationBlend = Blend.InvSourceColor;
-                //agua.render();
-                oceano.render();
-                d3dDevice.RenderState.SourceBlend = ant_src;
-                d3dDevice.RenderState.DestinationBlend = ant_dest;
-                d3dDevice.RenderState.AlphaBlendEnable = ant_alpha;
-                //agua.render();
+            //Dibujamos la escena
+            //escena.renderAll();
+            Blend ant_src = d3dDevice.RenderState.SourceBlend;
+            Blend ant_dest = d3dDevice.RenderState.DestinationBlend;
+            bool ant_alpha = d3dDevice.RenderState.AlphaBlendEnable;
+            d3dDevice.RenderState.AlphaBlendEnable = true;
+            d3dDevice.RenderState.SourceBlend = Blend.SourceColor;
+            d3dDevice.RenderState.DestinationBlend = Blend.InvSourceColor;
+            //agua.render();
+            oceano.render();
+            d3dDevice.RenderState.SourceBlend = ant_src;
+            d3dDevice.RenderState.DestinationBlend = ant_dest;
+            d3dDevice.RenderState.AlphaBlendEnable = ant_alpha;
+           // agua.render();
 
-                skyBox.render();
+            skyBox.render();
 
-            
 
+
+            //Terminamos manualmente el renderizado de esta escena. Esto manda todo a dibujar al GPU al Render Target que cargamos antes
+            d3dDevice.EndScene();
         }
 
-        private void checkearVidas(Barco barco)
+        private void drawPostProcess(Microsoft.DirectX.Direct3D.Device d3dDevice)
         {
-            if (barco.Vida < 0)
+            //Arrancamos la escena
+            d3dDevice.BeginScene();
+
+            //Cargamos para renderizar el unico modelo que tenemos, un Quad que ocupa toda la pantalla, con la textura de todo lo dibujado antes
+            d3dDevice.VertexFormat = CustomVertex.PositionTextured.Format;
+            d3dDevice.SetStreamSource(0, screenQuadVB, 0);
+
+            //Ver si el efecto de alarma esta activado, configurar Technique del shader segun corresponda
+            bool activar_efecto = (bool)GuiController.Instance.Modifiers["activar_efecto"];
+            if (activar_efecto)
             {
-                barco.Mesh.setColor(Color.Red);
+                effectlluvia.Technique = "AlarmaTechnique";
             }
+            else
+            {
+                effectlluvia.Technique = "DefaultTechnique";
+            }
+
+            //Cargamos parametros en el shader de Post-Procesado
+            effectlluvia.SetValue("render_target2D", renderTarget2D);
+            effectlluvia.SetValue("textura_alarma", alarmTexture.D3dTexture);
+            effectlluvia.SetValue("alarmaScaleFactor", intVaivenAlarm.update());
+
+            //Limiamos la pantalla y ejecutamos el render del shader
+            d3dDevice.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.Black, 1.0f, 0);
+            effectlluvia.Begin(FX.None);
+            effectlluvia.BeginPass(0);
+            d3dDevice.DrawPrimitives(PrimitiveType.TriangleStrip, 0, 2);
+            effectlluvia.EndPass();
+            effectlluvia.End();
+
+            //Terminamos el renderizado de la escena
+            d3dDevice.EndScene();
         }
 
         /// <summary>
