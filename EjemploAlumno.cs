@@ -12,10 +12,11 @@ using TgcViewer.Utils.Input;
 using Microsoft.DirectX.DirectInput;
 using TgcViewer.Utils.Terrain;
 using TgcViewer.Utils.Shaders;
-using Examples.TerrainEditor;
+//using Examples.TerrainEditor;
 using TgcViewer.Utils.Interpolation;
 using TgcViewer.Utils;
 using TgcViewer.Utils.Shaders;
+using TgcViewer.Utils.TgcGeometry;
 
 namespace AlumnoEjemplos.Quicksort 
 {
@@ -41,7 +42,7 @@ namespace AlumnoEjemplos.Quicksort
         float near_plane = 1f;
         float far_plane = 10000f;
         
-        Microsoft.DirectX.Direct3D.Effect efectoAgua;
+        Microsoft.DirectX.Direct3D.Effect efectosAguaIluminacion;
         float time;
         Texture textura;
         Texture diffuseMapTexture;
@@ -50,6 +51,8 @@ namespace AlumnoEjemplos.Quicksort
         Vector3 g_LightDir;						// direccion de la luz actual
         Matrix g_LightView;						// matriz de view del light
         float alfa_sol;             // pos. del sol
+
+        TgcBox sol;
 
         //lluvia
         VertexBuffer screenQuadVB;
@@ -89,6 +92,10 @@ namespace AlumnoEjemplos.Quicksort
             //Activamos el renderizado customizado. De esta forma el framework nos delega control total sobre como dibujar en pantalla
             //La responsabilidad cae toda de nuestro lado
             GuiController.Instance.CustomRenderEnabled = true;
+            g_pCubeMapAgua = TextureLoader.FromCubeFile(d3dDevice, GuiController.Instance.ExamplesMediaDir + "Shaders\\CubeMap.dds");
+            sol = TgcBox.fromSize(new Vector3(50, 50, 50), Color.LightYellow);
+
+            
 
             //Cargo la escena completa que tendria que ser la del escenario con el cielo / la del agua
             //PROXIMAMENTE, ahora cargo otro escenario
@@ -146,7 +153,7 @@ namespace AlumnoEjemplos.Quicksort
             diffuseMapTexture = Texture.FromBitmap(d3dDevice, b, Usage.None, Pool.Managed);
 
             oceano = new SmartTerrain();
-            oceano.loadHeightmap(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg", 20.00f, 0.0f, new Vector3(0, 0, 0));
+            oceano.loadHeightmap(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg", 10.00f, 1.0f, new Vector3(0, 0, 0));
             oceano.loadTexture(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg");
             
             TgcSceneLoader loader = new TgcSceneLoader();
@@ -192,15 +199,23 @@ namespace AlumnoEjemplos.Quicksort
             //agua.Scale = new Vector3(25f, 1f, 25f);
             //agua.Position = new Vector3(0f, 0f, 0f);
 
-            efectoAgua = TgcShaders.loadEffect(GuiController.Instance.AlumnoEjemplosMediaDir + "shader_agua.fx");
-            oceano.Effect = efectoAgua;
-            oceano.Technique = "RenderAgua";
+            efectosAguaIluminacion = TgcShaders.loadEffect(GuiController.Instance.AlumnoEjemplosMediaDir + "shader_agua.fx");
+            oceano.Effect = efectosAguaIluminacion;
+            oceano.Technique = "RenderAgua";//"EnvironmentMapTechnique"; //"RenderAgua";
 
             
 
             barcoPrincipal = new BarcoPlayer(100, 20, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh,0.05,loader);
             barcoEnemigo = new BarcoBot(100, 25,100, ACELERACION, 18, meshBot, 0.05,barcoPrincipal,loader);
             barcoPrincipal.BarcoEnemigo = barcoEnemigo;
+
+            // iluminacion en los barcos
+            barcoPrincipal.Mesh.Effect = efectosAguaIluminacion;
+            barcoPrincipal.Mesh.Technique = "EnvironmentMapTechnique";
+
+            barcoEnemigo.Mesh.Effect = efectosAguaIluminacion;
+            barcoEnemigo.Mesh.Technique = "EnvironmentMapTechnique";
+
             //Camara en tercera persona focuseada en el barco (canoa) 
 
             GuiController.Instance.ThirdPersonCamera.Enable = true;
@@ -211,6 +226,20 @@ namespace AlumnoEjemplos.Quicksort
 
             //PARA DESARROLLO DEL ESCENARIO ES MEJOR MOVERSE CON ESTA CAMARA
             GuiController.Instance.FpsCamera.Enable = true;
+
+            GuiController.Instance.Modifiers.addFloat("reflection", 0, 1, 0.35f);
+            GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-200, 0, -200), new Vector3(200, 1000, 200), new Vector3(0, 900, 0));
+            GuiController.Instance.Modifiers.addColor("lightColor", Color.LightYellow);
+            GuiController.Instance.Modifiers.addFloat("bumpiness", 0, 1, 1f);
+            GuiController.Instance.Modifiers.addFloat("lightIntensity", 0, 150, 100);
+            GuiController.Instance.Modifiers.addFloat("lightAttenuation", 0.1f, 2, 0.3f);
+            GuiController.Instance.Modifiers.addFloat("specularEx", 0, 20, 9f);
+            
+
+            GuiController.Instance.Modifiers.addColor("mEmissive", Color.Black);
+            GuiController.Instance.Modifiers.addColor("mAmbient", Color.White);
+            GuiController.Instance.Modifiers.addColor("mDiffuse", Color.White);
+            GuiController.Instance.Modifiers.addColor("mSpecular", Color.White);
 
             //Carpeta de archivos Media del alumno
             //string alumnoMediaFolder = GuiController.Instance.AlumnoEjemplosMediaDir;
@@ -288,22 +317,26 @@ namespace AlumnoEjemplos.Quicksort
             g_LightDir = -g_LightPos;
             g_LightDir.Normalize();
 
+            //Actualzar posición de la luz
+            Vector3 lightPos = (Vector3)GuiController.Instance.Modifiers["lightPos"];
+            sol.Position = lightPos;
+            Vector3 eyePosition = GuiController.Instance.FpsCamera.getPosition();
 
-
-            if (g_pCubeMapAgua == null)
+            if (g_pCubeMapAgua != null)
             {
-                CrearEnvMapAgua();
-                efectoAgua.SetValue("g_txCubeMapAgua", g_pCubeMapAgua);
+                //CrearEnvMapAgua();
+                efectosAguaIluminacion.SetValue("g_txCubeMapAgua", g_pCubeMapAgua);
+                efectosAguaIluminacion.SetValue("texCubeMap", g_pCubeMapAgua);
             }
 
 
-            efectoAgua.SetValue("g_vLightPos", new Vector4(g_LightPos.X, g_LightPos.Y, g_LightPos.Z, 1));
-            efectoAgua.SetValue("g_vLightDir", new Vector4(g_LightDir.X, g_LightDir.Y, g_LightDir.Z, 1));
+            efectosAguaIluminacion.SetValue("g_vLightPos", new Vector4(g_LightPos.X, g_LightPos.Y, g_LightPos.Z, 1));
+            efectosAguaIluminacion.SetValue("g_vLightDir", new Vector4(g_LightDir.X, g_LightDir.Y, g_LightDir.Z, 1));
             g_LightView = Matrix.LookAtLH(g_LightPos, g_LightPos + g_LightDir, new Vector3(0, 0, 1));
-            efectoAgua.SetValue("g_mViewLightProj", g_LightView);
-            efectoAgua.SetValue("time", time);
-            efectoAgua.SetValue("aux_Tex", textura);
-            efectoAgua.SetValue("texDiffuseMap", diffuseMapTexture);
+            efectosAguaIluminacion.SetValue("g_mViewLightProj", g_LightView);
+            efectosAguaIluminacion.SetValue("time", time);
+            efectosAguaIluminacion.SetValue("aux_Tex", textura);
+            efectosAguaIluminacion.SetValue("texDiffuseMap", diffuseMapTexture);
 
             //Hacer que la camara siga al personaje en su nueva posicion
             // GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
@@ -317,10 +350,30 @@ namespace AlumnoEjemplos.Quicksort
             barcoEnemigo.Movimiento(elapsedTime);
             barcoPrincipal.colocarAltura(time);
             barcoEnemigo.colocarAltura(time);
+
+            barcoPrincipal.Mesh.Effect.SetValue("lightColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["lightColor"]));
+            barcoPrincipal.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
+            barcoPrincipal.Mesh.Effect.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(eyePosition));
+            barcoPrincipal.Mesh.Effect.SetValue("lightIntensity", (float)GuiController.Instance.Modifiers["lightIntensity"]);
+            barcoPrincipal.Mesh.Effect.SetValue("bumpiness", (float)GuiController.Instance.Modifiers["bumpiness"]);
+            barcoPrincipal.Mesh.Effect.SetValue("lightAttenuation", (float)GuiController.Instance.Modifiers["lightAttenuation"]);
+            barcoPrincipal.Mesh.Effect.SetValue("reflection", (float)GuiController.Instance.Modifiers["reflection"]);
+
             barcoPrincipal.Mesh.render();
+
+            barcoEnemigo.Mesh.Effect.SetValue("lightColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["lightColor"]));
+            barcoEnemigo.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
+            barcoEnemigo.Mesh.Effect.SetValue("bumpiness", (float)GuiController.Instance.Modifiers["bumpiness"]);
+            barcoEnemigo.Mesh.Effect.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(eyePosition));
+            barcoEnemigo.Mesh.Effect.SetValue("lightIntensity", (float)GuiController.Instance.Modifiers["lightIntensity"]);
+            barcoEnemigo.Mesh.Effect.SetValue("lightAttenuation", (float)GuiController.Instance.Modifiers["lightAttenuation"]);
+            barcoEnemigo.Mesh.Effect.SetValue("reflection", (float)GuiController.Instance.Modifiers["reflection"]);
+
             barcoEnemigo.Mesh.render();
+
             barcoPrincipal.volverAltura(time);
             barcoEnemigo.volverAltura(time);
+
             foreach (var bala in barcoPrincipal.balas)
             {
                 if (bala.Mesh.Position.Y > 0)
@@ -345,19 +398,20 @@ namespace AlumnoEjemplos.Quicksort
             checkearVidas(barcoPrincipal);
             //Dibujamos la escena
             //escena.renderAll();
-            Blend ant_src = d3dDevice.RenderState.SourceBlend;
+            /*Blend ant_src = d3dDevice.RenderState.SourceBlend;
             Blend ant_dest = d3dDevice.RenderState.DestinationBlend;
             bool ant_alpha = d3dDevice.RenderState.AlphaBlendEnable;
             d3dDevice.RenderState.AlphaBlendEnable = true;
             d3dDevice.RenderState.SourceBlend = Blend.SourceColor;
             d3dDevice.RenderState.DestinationBlend = Blend.InvSourceColor;
             //agua.render();
-            oceano.render();
             d3dDevice.RenderState.SourceBlend = ant_src;
             d3dDevice.RenderState.DestinationBlend = ant_dest;
-            d3dDevice.RenderState.AlphaBlendEnable = ant_alpha;
+            d3dDevice.RenderState.AlphaBlendEnable = ant_alpha;*/
            // agua.render();
-
+            
+            oceano.render();
+            sol.render();
             skyBox.render();
 
 
@@ -414,7 +468,7 @@ namespace AlumnoEjemplos.Quicksort
             meshBot.dispose();
         }
 
-        public void CrearEnvMapAgua()
+       /* public void CrearEnvMapAgua()
         {
             // creo el enviroment map para el agua
             Microsoft.DirectX.Direct3D.Device device = GuiController.Instance.D3dDevice;
@@ -499,10 +553,10 @@ namespace AlumnoEjemplos.Quicksort
                 //SurfaceLoader.Save(fname, ImageFileFormat.Bmp, pFace);
 
                 //device.EndScene();
-            }
+            //}
             // restuaro el render target
-            device.SetRenderTarget(0, pOldRT);
-        }
+           // device.SetRenderTarget(0, pOldRT);
+        //}*/
 
 
     }

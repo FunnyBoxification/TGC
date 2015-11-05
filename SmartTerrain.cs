@@ -8,7 +8,7 @@ using TgcViewer;
 using System;
 using System.Collections.Generic;
 
-namespace Examples.TerrainEditor
+namespace AlumnoEjemplos.Quicksort
 {
     public class SmartTerrain
     {
