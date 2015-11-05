@@ -250,20 +250,20 @@ namespace AlumnoEjemplos.Quicksort
 
         public override void render(float elapsedTime)
         {
-            seleccion = true;
-            if (seleccion)
-            {
-                //Iniciar dibujado de todos los Sprites de la escena (en este caso es solo uno)
-                GuiController.Instance.Drawer2D.beginDrawSprite();
+            //seleccion = true;
+            //if (seleccion)
+            //{
+            //    //Iniciar dibujado de todos los Sprites de la escena (en este caso es solo uno)
+            //    GuiController.Instance.Drawer2D.beginDrawSprite();
 
-                //Dibujar sprite (si hubiese mas, deberian ir todos aquí)
-                sprite.render();
-                sprite2.render();
+            //    //Dibujar sprite (si hubiese mas, deberian ir todos aquí)
+            //    sprite.render();
+            //    sprite2.render();
                 
-                //Finalizar el dibujado de Sprites
-                GuiController.Instance.Drawer2D.endDrawSprite();
-            }
-            else
+            //    //Finalizar el dibujado de Sprites
+            //    GuiController.Instance.Drawer2D.endDrawSprite();
+            //}
+            //else
             {
 
 
@@ -360,15 +360,19 @@ namespace AlumnoEjemplos.Quicksort
 
             //Dibujar objeto principal
             //Siempre primero hacer todos los cálculos de lógica e input y luego al final dibujar todo (ciclo update-render)
-
+            if (barcoPrincipal.Vida > 0){
             barcoPrincipal.Movimiento(elapsedTime);
+            }
+             if (barcoEnemigo.Vida > 0){
             barcoEnemigo.Movimiento(elapsedTime);
+             }
             barcoPrincipal.colocarAltura(time);
             barcoEnemigo.colocarAltura(time);
             barcoPrincipal.Mesh.render();
             barcoEnemigo.Mesh.render();
             barcoPrincipal.volverAltura(time);
             barcoEnemigo.volverAltura(time);
+
             foreach (var bala in barcoPrincipal.balas)
             {
                 if (bala.Mesh.Position.Y > 0)
