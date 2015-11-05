@@ -182,7 +182,7 @@ namespace AlumnoEjemplos.Quicksort
             diffuseMapTexture = Texture.FromBitmap(d3dDevice, b, Usage.None, Pool.Managed);
 
             oceano = new SmartTerrain();
-            oceano.loadHeightmap(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg", 10.00f, 1.0f, new Vector3(0, 0, 0));
+            oceano.loadHeightmap(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg", 20.00f, 1.0f, new Vector3(0, 0, 0));
             oceano.loadTexture(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg");
             
             TgcSceneLoader loader = new TgcSceneLoader();
@@ -247,14 +247,14 @@ namespace AlumnoEjemplos.Quicksort
 
             //Camara en tercera persona focuseada en el barco (canoa) 
 
-            GuiController.Instance.ThirdPersonCamera.Enable = true;
+            /*GuiController.Instance.ThirdPersonCamera.Enable = true;
             GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 200, 300);
             GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
-            GuiController.Instance.RotCamera.Enable = false;
+            GuiController.Instance.RotCamera.Enable = false;*/
 
 
             //PARA DESARROLLO DEL ESCENARIO ES MEJOR MOVERSE CON ESTA CAMARA
-            //GuiController.Instance.FpsCamera.Enable = true;
+            GuiController.Instance.FpsCamera.Enable = true;
 
             GuiController.Instance.Modifiers.addFloat("reflection", 0, 1, 0.35f);
             GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-200, 0, -200), new Vector3(200, 1000, 200), new Vector3(0, 900, 0));
