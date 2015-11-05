@@ -16,6 +16,8 @@ using Examples.TerrainEditor;
 using TgcViewer.Utils.Interpolation;
 using TgcViewer.Utils;
 using TgcViewer.Utils.Shaders;
+using TgcViewer.Utils._2D;
+using TgcViewer.Utils.TgcGeometry;
 
 namespace AlumnoEjemplos.Quicksort 
 {
@@ -25,6 +27,8 @@ namespace AlumnoEjemplos.Quicksort
         const float VELOCIDAD_MOVIMIENTO = 125f;
         const float VELOCIDAD_ROTACION = 20f;
         const float ACELERACION = 2f;
+
+        public bool seleccion { get; set; }
 
         SmartTerrain oceano;
 
@@ -46,11 +50,17 @@ namespace AlumnoEjemplos.Quicksort
         Texture textura;
         Texture diffuseMapTexture;
 
+
         Vector3 g_LightPos;						// posicion de la luz actual (la que estoy analizando)
         Vector3 g_LightDir;						// direccion de la luz actual
         Matrix g_LightView;						// matriz de view del light
         float alfa_sol;             // pos. del sol
 
+        //inicio
+        TgcSprite sprite;
+        TgcSprite sprite2;
+        
+        //inicio
         //lluvia
         VertexBuffer screenQuadVB;
         Texture renderTarget2D;
@@ -134,7 +144,27 @@ namespace AlumnoEjemplos.Quicksort
 
             //termina post process
 
+            //inicio//
+            sprite = new TgcSprite();
+            sprite.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "MenuPrincipal.jpg");
+            
+            Size screenSize = GuiController.Instance.Panel3d.Size;
+            Size textureSize = sprite.Texture.Size;
+            sprite.Scaling = new Vector2(1f, 0.8f);
+            sprite.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize.Width / 2, 0), FastMath.Max(screenSize.Height / 2 - textureSize.Height / 2, 0));
+            
+            sprite2 = new TgcSprite();
+            sprite2.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "startgame.jpg");
 
+            sprite2.Scaling = new Vector2(0.6f, 0.6f);
+            Size textureSize2 = sprite2.Texture.Size;
+            
+            sprite2.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize2.Width / 2, 0), FastMath.Max(screenSize.Height / 2 - textureSize2.Height / 2, 0));
+            sprite2.Position = new Vector2(sprite2.Position.X + 80, sprite2.Position.Y);
+
+           
+
+            //inicio//
 
             Bitmap b = (Bitmap)Bitmap.FromFile(GuiController.Instance.ExamplesDir
                     + "Shaders\\WorkshopShaders\\Media\\Heighmaps\\" + "TerrainTexture3.jpg");
@@ -210,7 +240,7 @@ namespace AlumnoEjemplos.Quicksort
 
 
             //PARA DESARROLLO DEL ESCENARIO ES MEJOR MOVERSE CON ESTA CAMARA
-            GuiController.Instance.FpsCamera.Enable = true;
+            //GuiController.Instance.FpsCamera.Enable = true;
 
             //Carpeta de archivos Media del alumno
             //string alumnoMediaFolder = GuiController.Instance.AlumnoEjemplosMediaDir;
@@ -220,36 +250,54 @@ namespace AlumnoEjemplos.Quicksort
 
         public override void render(float elapsedTime)
         {
-            //Device de DirectX para renderizar
-            Microsoft.DirectX.Direct3D.Device d3dDevice = GuiController.Instance.D3dDevice;
-            time += elapsedTime;
+            seleccion = true;
+            if (seleccion)
+            {
+                //Iniciar dibujado de todos los Sprites de la escena (en este caso es solo uno)
+                GuiController.Instance.Drawer2D.beginDrawSprite();
 
-            //Cargamos el Render Targer al cual se va a dibujar la escena 3D. Antes nos guardamos el surface original
-            //En vez de dibujar a la pantalla, dibujamos a un buffer auxiliar, nuestro Render Target.
-            pOldRT = d3dDevice.GetRenderTarget(0);
-            Surface pSurf = renderTarget2D.GetSurfaceLevel(0);
-            d3dDevice.SetRenderTarget(0, pSurf);
-            d3dDevice.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.Black, 1.0f, 0);
-
-
-            //Dibujamos la escena comun, pero en vez de a la pantalla al Render Target
-            drawSceneToRenderTarget(d3dDevice, elapsedTime);
-
-            //Liberar memoria de surface de Render Target
-            pSurf.Dispose();
-
-            //Si quisieramos ver que se dibujo, podemos guardar el resultado a una textura en un archivo para debugear su resultado (ojo, es lento)
-            //TextureLoader.Save(GuiController.Instance.ExamplesMediaDir + "Shaders\\render_target.bmp", ImageFileFormat.Bmp, renderTarget2D);
+                //Dibujar sprite (si hubiese mas, deberian ir todos aquí)
+                sprite.render();
+                sprite2.render();
+                
+                //Finalizar el dibujado de Sprites
+                GuiController.Instance.Drawer2D.endDrawSprite();
+            }
+            else
+            {
 
 
-            //Ahora volvemos a restaurar el Render Target original (osea dibujar a la pantalla)
-            d3dDevice.SetRenderTarget(0, pOldRT);
+
+                //Device de DirectX para renderizar
+                Microsoft.DirectX.Direct3D.Device d3dDevice = GuiController.Instance.D3dDevice;
+                time += elapsedTime;
+
+                //Cargamos el Render Targer al cual se va a dibujar la escena 3D. Antes nos guardamos el surface original
+                //En vez de dibujar a la pantalla, dibujamos a un buffer auxiliar, nuestro Render Target.
+                pOldRT = d3dDevice.GetRenderTarget(0);
+                Surface pSurf = renderTarget2D.GetSurfaceLevel(0);
+                d3dDevice.SetRenderTarget(0, pSurf);
+                d3dDevice.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.Black, 1.0f, 0);
 
 
-            //Luego tomamos lo dibujado antes y lo combinamos con una textura con efecto de alarma
-            drawPostProcess(d3dDevice);
-            
+                //Dibujamos la escena comun, pero en vez de a la pantalla al Render Target
+                drawSceneToRenderTarget(d3dDevice, elapsedTime);
 
+                //Liberar memoria de surface de Render Target
+                pSurf.Dispose();
+
+                //Si quisieramos ver que se dibujo, podemos guardar el resultado a una textura en un archivo para debugear su resultado (ojo, es lento)
+                //TextureLoader.Save(GuiController.Instance.ExamplesMediaDir + "Shaders\\render_target.bmp", ImageFileFormat.Bmp, renderTarget2D);
+
+
+                //Ahora volvemos a restaurar el Render Target original (osea dibujar a la pantalla)
+                d3dDevice.SetRenderTarget(0, pOldRT);
+
+
+                //Luego tomamos lo dibujado antes y lo combinamos con una textura con efecto de alarma
+                drawPostProcess(d3dDevice);
+
+            }
         }
 
         private void checkearVidas(Barco barco)
@@ -505,5 +553,7 @@ namespace AlumnoEjemplos.Quicksort
         }
 
 
+
+        
     }
 }
