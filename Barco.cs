@@ -152,14 +152,14 @@ namespace AlumnoEjemplos.Quicksort
             /*double L = 50;	// wavelength
             double w = 5f * 3.1416f / L;
             double Q = 0.5f;*/
-            float x = Mesh.Position.X;
+            float x = Mesh.Position.X /50;
             
             float y = Mesh.Position.Y;
             //float3 D = float3(1,1,0);
             // float dotD = dot(P0.xy, D);
 
-            double C = Math.Cos(0.08 * x - time);
-            double S = Math.Sin(0.08 * x - time);
+            double C = Math.Cos(0.091*x -  time+0);
+            double S = Math.Sin(0.091*x -  time+ 0);
 
             //float y;
             y =  A * ((float)C + (float)S);

@@ -458,14 +458,15 @@ namespace AlumnoEjemplos.Quicksort
             oceano.render();
             //Dibujar objeto principal
             //Siempre primero hacer todos los cálculos de lógica e input y luego al final dibujar todo (ciclo update-render)
+            barcoPrincipal.colocarAltura(time);
+            barcoEnemigo.colocarAltura(time);
             if (barcoPrincipal.Vida > 0){
             barcoPrincipal.Movimiento(elapsedTime);
             }
              if (barcoEnemigo.Vida > 0){
             barcoEnemigo.Movimiento(elapsedTime);
              }
-            barcoPrincipal.colocarAltura(time);
-            barcoEnemigo.colocarAltura(time);
+            
 
             barcoPrincipal.Mesh.Effect.SetValue("lightColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["lightColor"]));
             barcoPrincipal.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));

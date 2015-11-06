@@ -30,7 +30,10 @@ namespace AlumnoEjemplos.Quicksort
 
         public float distancia()
         {
-            return (Vector3.Length(BarcoEnemigo.Mesh.Position - this.Mesh.Position));
+            Vector3 vectplanchado1 = new Vector3(BarcoEnemigo.Mesh.Position.X, 0, BarcoEnemigo.Mesh.Position.Z);
+            Vector3 vectplanchado2 = new Vector3(this.Mesh.Position.X, 0, this.Mesh.Position.Z);
+            
+            return (Vector3.Length(vectplanchado1 - vectplanchado2));
         }
 
         public Boolean estaEnCarrera()
@@ -59,8 +62,9 @@ namespace AlumnoEjemplos.Quicksort
                  acelerar();
                 var vect = new Vector3(FastMath.Sin(Mesh.Rotation.Y), 0 ,FastMath.Cos(Mesh.Rotation.Y));
                 var vect2 = new Vector3(FastMath.Sin(BarcoEnemigo.Mesh.Rotation.Y), 0, FastMath.Cos(BarcoEnemigo.Mesh.Rotation.Y));
-                                
-                Vector3 vectnDireccion = Vector3.Normalize(BarcoEnemigo.Mesh.Position - this.Mesh.Position);
+                 Vector3 vectplanchado1 = new Vector3(BarcoEnemigo.Mesh.Position.X, 0, BarcoEnemigo.Mesh.Position.Z);
+                    Vector3 vectplanchado2 = new Vector3(this.Mesh.Position.X, 0, this.Mesh.Position.Z);
+                    Vector3 vectnDireccion = Vector3.Normalize(vectplanchado1-vectplanchado2);
                 Vector3 vectnMio = Vector3.Normalize(this.Mesh.Rotation);
                 var cdot = Vector3.Dot(vectnDireccion, vectnMio);                
                 var angulo = Geometry.RadianToDegree((float)Math.Acos(Vector3.Dot(vectnDireccion, vect)));
@@ -86,8 +90,9 @@ namespace AlumnoEjemplos.Quicksort
                 
                 var vect = new Vector3(FastMath.Sin(Mesh.Rotation.Y), 0, FastMath.Cos(Mesh.Rotation.Y));
                 //var vect2 = new Vector3(FastMath.Sin(BarcoEnemigo.Mesh.Rotation.Y), 0, FastMath.Cos(BarcoEnemigo.Mesh.Rotation.Y));
-                
-                Vector3 vectnDireccion = Vector3.Normalize(BarcoEnemigo.Mesh.Position - this.Mesh.Position);
+                 Vector3 vectplanchado1 = new Vector3(BarcoEnemigo.Mesh.Position.X, 0, BarcoEnemigo.Mesh.Position.Z);
+                    Vector3 vectplanchado2 = new Vector3(this.Mesh.Position.X, 0, this.Mesh.Position.Z);
+                    Vector3 vectnDireccion = Vector3.Normalize(vectplanchado1 - vectplanchado2);
                 //Vector3 vectnMio = Vector3.Normalize(this.Mesh.Rotation);
                 //var cdot = Vector3.Dot(vectnDireccion, vectnMio);                
                 //var angulo = Geometry.RadianToDegree((float)Math.Acos(Vector3.Dot(vectnDireccion, vect)));
@@ -115,7 +120,9 @@ namespace AlumnoEjemplos.Quicksort
                     frenar();
 
                     var vect = new Vector3(FastMath.Sin(Mesh.Rotation.Y), 0, FastMath.Cos(Mesh.Rotation.Y));
-                    Vector3 vectnDireccion = Vector3.Normalize(BarcoEnemigo.Mesh.Position - this.Mesh.Position);
+                    Vector3 vectplanchado1 = new Vector3(BarcoEnemigo.Mesh.Position.X, 0, BarcoEnemigo.Mesh.Position.Z);
+                    Vector3 vectplanchado2 = new Vector3(this.Mesh.Position.X, 0, this.Mesh.Position.Z);
+                    Vector3 vectnDireccion = Vector3.Normalize(vectplanchado1-vectplanchado2);
 
                     if (!(Vector3.Dot(vect, vectnDireccion) == 1))
                     {
