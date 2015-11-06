@@ -158,8 +158,8 @@ namespace AlumnoEjemplos.Quicksort
             //float3 D = float3(1,1,0);
             // float dotD = dot(P0.xy, D);
 
-            double C = Math.Cos(0.08 * x / 50 - time);
-            double S = Math.Sin(0.08 * x/50 - time);
+            double C = Math.Cos(0.08 * x - time);
+            double S = Math.Sin(0.08 * x - time);
 
             //float y;
             y =  A * ((float)C + (float)S);

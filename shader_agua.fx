@@ -221,13 +221,13 @@ struct VS_OUTPUT2
 
    float3 P0 = Pos.xyz;
 
-   float C = cos(0.08*P0.x - time);
-   float S = sin(0.08*P0.x -  time);
+   float C =  cos(0.091*P0.x - time + 0.91); //+0.2);
+   float S =  sin(0.091*P0.x -  time+ 0.91);// +0.2 );
 
    VS_OUTPUT2 Output;
    
    Pos.x = P0.x;
-   Pos.y =  (A+50) * (C + S) ;
+   Pos.y =  (A+50) * (C + S) - 2 ;
    Pos.z = P0.z; 
 
    //Proyectar posicion
