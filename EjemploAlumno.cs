@@ -185,8 +185,7 @@ namespace AlumnoEjemplos.Quicksort
 
             //inicio//
 
-            Bitmap b = (Bitmap)Bitmap.FromFile(GuiController.Instance.ExamplesDir
-                    + "Shaders\\WorkshopShaders\\Media\\Heighmaps\\" + "TerrainTexture3.jpg");
+            Bitmap b = (Bitmap)Bitmap.FromFile(GuiController.Instance.AlumnoEjemplosMediaDir +  "agua.bmp");
             b.RotateFlip(RotateFlipType.Rotate90FlipX);
             textura = Texture.FromBitmap(d3dDevice, b, Usage.None, Pool.Managed);
 

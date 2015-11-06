@@ -167,52 +167,52 @@ struct VS_OUTPUT2
 };
 
 //Estructura para guardar datos de la Luz
-// struct LightSampleValues {
-	// float3 L;
-	// float iL;
-// };
+struct LightSampleValues {
+	float3 L;
+	float iL;
+};
 
-//Calcular valores de luz para Point Light
-// LightSampleValues computePointLightValues(in float4 surfacePosition)
-// {
-	// LightSampleValues values;
-	// values.L = lightPosition.xyz - surfacePosition.xyz;
-	// float dist = length(values.L);
-	// values.L = values.L / dist; // normalize
+// Calcular valores de luz para Point Light
+LightSampleValues computePointLightValues(in float4 surfacePosition)
+{
+	LightSampleValues values;
+	values.L = lightPosition.xyz - surfacePosition.xyz;
+	float dist = length(values.L);
+	values.L = values.L / dist; // normalize
 	
-	// //attenuation
-	// float distAtten = dist * lightAttenuation;
+	//attenuation
+	float distAtten = dist * lightAttenuation;
 	
-	// values.iL = lightIntensity / distAtten;
-	// return values;
-// }
+	values.iL = lightIntensity / distAtten;
+	return values;
+}
 
 /*-------------- Calculo de componentes: AMBIENT, DIFFUSE y SPECULAR ---------------*/
 
 //Calcular color RGB de Ambient
-// float3 computeAmbientComponent(in LightSampleValues light)
-// {
-	// return light.iL * lightColor * materialAmbientColor;
-// }
+float3 computeAmbientComponent(in LightSampleValues light)
+{
+	return light.iL * lightColor * materialAmbientColor;
+}
 
 // //Calcular color RGB de Diffuse
-// float3 computeDiffuseComponent(in float3 surfaceNormal, in LightSampleValues light)
-// {
-	// return light.iL * lightColor * materialDiffuseColor.rgb * max(0.0, dot(surfaceNormal, light.L));
-// }
+float3 computeDiffuseComponent(in float3 surfaceNormal, in LightSampleValues light)
+{
+	return light.iL * lightColor * materialDiffuseColor.rgb * max(0.0, dot(surfaceNormal, light.L));
+}
 
 // //Calcular color RGB de Specular
-// float3 computeSpecularComponent(in float3 surfaceNormal, in float4 surfacePosition, in LightSampleValues light)
-// {
-	// float3 viewVector = normalize(-surfacePosition.xyz);
-	// float3 reflectionVector = 2.0 * dot(light.L, surfaceNormal) * surfaceNormal - light.L;
-	// return (dot(surfaceNormal, light.L) <= 0.0)
-			// ? float3(0.0,0.0,0.0)
-			// : (
-				// light.iL * lightColor * materialSpecularColor 
-				// * pow( max( 0.0, dot(reflectionVector, viewVector) ), materialSpecularExp )
-			// );
-// }
+float3 computeSpecularComponent(in float3 surfaceNormal, in float4 surfacePosition, in LightSampleValues light)
+{
+	float3 viewVector = normalize(-surfacePosition.xyz);
+	float3 reflectionVector = 2.0 * dot(light.L, surfaceNormal) * surfaceNormal - light.L;
+	return (dot(surfaceNormal, light.L) <= 0.0)
+			? float3(0.0,0.0,0.0)
+			: (
+				light.iL * lightColor * materialSpecularColor 
+				* pow( max( 0.0, dot(reflectionVector, viewVector) ), materialSpecularExp )
+			);
+}
  
  VS_OUTPUT2 VSAgua( float4 Pos:POSITION0,float3 Normal:NORMAL, float2 Texcoord:TEXCOORD0)
 {
@@ -318,53 +318,53 @@ float4 PSAgua(	float3 oPos: POSITION,
 }
 
 //Pixel Shader para Point Light
-// float4 point_light_ps(PS_INPUT input) : COLOR0
-// {      
-	// //Calcular datos de iluminacion para Directional Light
-	// LightSampleValues light = computePointLightValues(input.lightingPosition);
+float4 point_light_ps( PS_INPUT2 input ) : COLOR0
+{      
+	//Calcular datos de iluminacion para Directional Light
+	LightSampleValues light = computePointLightValues(input.lightingPosition);
 	
-	// //Sumar Emissive + Ambient + Diffuse
-	// float3 interpolatedNormal = normalize(input.lightingNormal);
-	// float4 diffuseLighting;
-	// diffuseLighting.rgb = materialEmissiveColor + computeAmbientComponent(light) + computeDiffuseComponent(interpolatedNormal, light);
-	// diffuseLighting.a = materialDiffuseColor.a;
+	//Sumar Emissive + Ambient + Diffuse
+	float3 interpolatedNormal = normalize(input.lightingNormal);
+	float4 diffuseLighting;
+	diffuseLighting.rgb = materialEmissiveColor + computeAmbientComponent(light) + computeDiffuseComponent(interpolatedNormal, light);
+	diffuseLighting.a = materialDiffuseColor.a;
 	
-	// //Calcular Specular por separado
-	// float4 specularLighting;
-	// specularLighting.rgb = computeSpecularComponent(interpolatedNormal, input.lightingPosition, light);
-	// specularLighting.a = 0;
+	//Calcular Specular por separado
+	float4 specularLighting;
+	specularLighting.rgb = computeSpecularComponent(interpolatedNormal, input.lightingPosition, light);
+	specularLighting.a = 0;
 	
-	// //Obtener texel de la textura
-	// float4 texelColor = tex2D(diffuseMap, input.Texcoord);
+	//Obtener texel de la textura
+	float4 texelColor = saturate(tex2D(auxMap, input.Texcoord)) * 0.65465;
 	
-	// //Modular Diffuse con color de la textura y sumar luego Specular
-	// float4 finalColor = diffuseLighting * texelColor + specularLighting;
+	//Modular Diffuse con color de la textura y sumar luego Specular
+	float4 finalColor = diffuseLighting * texelColor + specularLighting * float4(32,193,84,1);
 
 	
-	// return finalColor;
-// }
+	return finalColor;
+}
 
-// VS_OUTPUT4 vs_general(VS_INPUT input)
-// {
-	// VS_OUTPUT output;
+VS_OUTPUT4 vs_general(VS_INPUT2 input)
+{
+	VS_OUTPUT4 output;
 
-	// //Proyectar posicion
-	// output.Position = mul(input.Position, matWorldViewProj);
+	//Proyectar posicion
+	output.Position = mul(input.Position, matWorldViewProj);
 
-	// //Las Coordenadas de textura quedan igual
-	// output.Texcoord = input.Texcoord;
+	//Las Coordenadas de textura quedan igual
+	output.Texcoord = input.Texcoord;
 
-	// // The position and normal for lighting
-	// // must be in camera space, not homogeneous space
+	// The position and normal for lighting
+	// must be in camera space, not homogeneous space
 	
-	// //Almacenar la posicion del vertice en ViewSpace para ser usada luego por la luz
-	// output.lightingPosition = mul(input.Position, matWorldView);
+	//Almacenar la posicion del vertice en ViewSpace para ser usada luego por la luz
+	output.lightingPosition = mul(input.Position, matWorldView);
 	
-	// //Almacenar la normal del vertice en ViewSpace para ser usada luego por la luz
-	// output.lightingNormal = mul(input.Normal, matWorldView);
+	//Almacenar la normal del vertice en ViewSpace para ser usada luego por la luz
+	output.lightingNormal = mul(input.Normal, matWorldView);
 
-	// return output;
-// }
+	return output;
+}
 
 technique RenderAgua
 {
@@ -373,11 +373,11 @@ technique RenderAgua
         VertexShader = compile vs_3_0 VSAgua();
         PixelShader = compile ps_3_0 PSAgua();
     }
-	    //pass p1
-    //{
-        //VertexShader = compile vs_2_0 vs_general();
-        //PixelShader = compile  ps_2_0 point_light_ps();
-    //}
+	pass p1
+    {
+        VertexShader = compile vs_2_0 VSAgua();
+        PixelShader = compile  ps_2_0 point_light_ps();
+    }
 
 }
 
