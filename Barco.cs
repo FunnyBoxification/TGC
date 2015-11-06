@@ -13,6 +13,7 @@ using Microsoft.DirectX.DirectInput;
 using TgcViewer.Utils.Terrain;
 using TgcViewer.Utils.Shaders;
 using TgcViewer.Utils.TgcGeometry;
+using TgcViewer.Utils.Collision.ElipsoidCollision;
 
 
 namespace AlumnoEjemplos.Quicksort
@@ -133,36 +134,45 @@ namespace AlumnoEjemplos.Quicksort
 
         public void colocarAltura(float time)
         {
-            double y = Calculo(time);
+            float y = Calculo(time);
 
-            Mesh.move(0, (float)y*10, 0);
+            Mesh.move(0, (float)y, 0);
         }
         public void volverAltura(float time)
         {
-            double y = Calculo( time);
+            float y = Calculo( time);
 
-            Mesh.move(0, -(float)y*10, 0);
+            Mesh.move(0, -(float)y, 0);
         }
 
-        private double Calculo(float time)
+        private float Calculo(float time)
         {
             //pruebo altura de ola
-            double A = 5;
-            double L = 50;	// wavelength
+            float A = 53f;
+            /*double L = 50;	// wavelength
             double w = 5f * 3.1416f / L;
-            double Q = 0.5f;
-            double x = Mesh.Position.X;
-            double z = Mesh.Position.Z;
-            double y = Mesh.Position.Y;
+            double Q = 0.5f;*/
+            float x = Mesh.Position.X;
+            
+            float y = Mesh.Position.Y;
             //float3 D = float3(1,1,0);
             // float dotD = dot(P0.xy, D);
 
-            double C = Math.Cos(0.005 * x -time);
-            double S = Math.Sin(0.005 * z -time);
-            
+            double C = Math.Cos(0.08 * x / 50 - time);
+            double S = Math.Sin(0.08 * x/50 - time);
 
+            //float y;
+            y =  A * ((float)C + (float)S);
 
-            y = Q * A * (S + C);
+            //bool b = Mapa.oceano_mesh.HeightmapData
+           /* TgcRay rayoArriba = new TgcRay(this.Mesh.Position, new Vector3(0, 1, 0));
+            TgcRay rayoAbajo = new TgcRay(this.Mesh.Position, new Vector3(0, -1, 0));
+            Vector3 colisionPoint;
+            if (Mapa.oceano_mesh.intersectRay(rayoArriba, out colisionPoint) || Mapa.oceano_mesh.intersectRay(rayoAbajo, out colisionPoint))
+            {
+                y = colisionPoint.Y;
+            }*/
+
             return y;
         }
 

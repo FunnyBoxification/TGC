@@ -29,7 +29,8 @@ namespace AlumnoEjemplos.Quicksort
         const float VELOCIDAD_ROTACION = 20f;
         const float ACELERACION = 2f;
 
-        public bool seleccion { get; set; }
+        bool pausaActiva = false;
+        bool comenzoJuego = false;
 
         SmartTerrain oceano;
 
@@ -48,8 +49,11 @@ namespace AlumnoEjemplos.Quicksort
         
         Microsoft.DirectX.Direct3D.Effect efectosAguaIluminacion;
         float time;
+        float timemenu;
         Texture textura;
         Texture diffuseMapTexture;
+
+        bool activar_efecto = false;
 
 
         Vector3 g_LightPos;						// posicion de la luz actual (la que estoy analizando)
@@ -59,8 +63,9 @@ namespace AlumnoEjemplos.Quicksort
         TgcBox sol;
 
        //inicio
-        TgcSprite sprite;
-        TgcSprite sprite2;
+        TgcSprite spriteFondo;
+        TgcSprite spriteLetras;
+        TgcSprite spriteInicio;
         
         //inicio
         //lluvia
@@ -151,23 +156,31 @@ namespace AlumnoEjemplos.Quicksort
             //termina post process
 
             //inicio//
-            sprite = new TgcSprite();
-            sprite.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "MenuPrincipal.jpg");
+            spriteFondo = new TgcSprite();
+            spriteFondo.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "MenuPrincipal.jpg");
             
             Size screenSize = GuiController.Instance.Panel3d.Size;
-            Size textureSize = sprite.Texture.Size;
-            sprite.Scaling = new Vector2(1f, 0.8f);
-            sprite.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize.Width / 2, 0), FastMath.Max(screenSize.Height / 2 - textureSize.Height / 2, 0));
+            Size textureSize = spriteFondo.Texture.Size;
+            spriteFondo.Scaling = new Vector2(1f, 0.8f);
+            spriteFondo.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize.Width / 2, 0), FastMath.Max(screenSize.Height / 2 - textureSize.Height / 2, 0));
             
-            sprite2 = new TgcSprite();
-            sprite2.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "startgame.jpg");
+            spriteLetras = new TgcSprite();
+            spriteLetras.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "Texto.png");
 
-            sprite2.Scaling = new Vector2(0.6f, 0.6f);
-            Size textureSize2 = sprite2.Texture.Size;
+            spriteInicio = new TgcSprite();
+            spriteInicio.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "inicio.png");
+
+            spriteLetras.Scaling = new Vector2(0.4f*1.65f, 0.3f*1.65f);
+            Size textureSize2 = spriteLetras.Texture.Size;
+
+            spriteInicio.Scaling = new Vector2(0.4f, 0.3f);
+            Size textureSize3 = spriteInicio.Texture.Size;
             
-            sprite2.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize2.Width / 2, 0), FastMath.Max(screenSize.Height / 2 - textureSize2.Height / 2, 0));
-            sprite2.Position = new Vector2(sprite2.Position.X + 80, sprite2.Position.Y);
+            spriteLetras.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize2.Width / 2, 0), FastMath.Max(screenSize.Height / 2 - textureSize2.Height / 2, 0));
+            spriteLetras.Position = new Vector2(spriteLetras.Position.X + 110, spriteLetras.Position.Y);
 
+            spriteInicio.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize3.Width / 2, 0), FastMath.Max(screenSize.Height / 2 - textureSize3.Height / 2, 0));
+            spriteInicio.Position = new Vector2(spriteInicio.Position.X + 210, spriteLetras.Position.Y+95);
            
 
             //inicio//
@@ -182,7 +195,8 @@ namespace AlumnoEjemplos.Quicksort
             diffuseMapTexture = Texture.FromBitmap(d3dDevice, b, Usage.None, Pool.Managed);
 
             oceano = new SmartTerrain();
-            oceano.loadHeightmap(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg", 20.00f, 1.0f, new Vector3(0, 0, 0));
+            //oceano.loadHeightmap(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg", 30.00f, 1.0f, new Vector3(0, 0, 0));
+            oceano.loadPlainHeightmap(256, 256, 0, 50.0f, 1.0f, new Vector3(0, 0, 0));
             oceano.loadTexture(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg");
             
             TgcSceneLoader loader = new TgcSceneLoader();
@@ -194,7 +208,7 @@ namespace AlumnoEjemplos.Quicksort
             //Crear SkyBox 
             skyBox = new TgcSkyBox();
             skyBox.Center = new Vector3(0, 0, 0);
-            skyBox.Size = new Vector3(3000, 1000, 3000);
+            skyBox.Size = new Vector3(10000, 10000, 10000);
 
             //Configurar color
             //skyBox.Color = Color.OrangeRed;
@@ -234,16 +248,16 @@ namespace AlumnoEjemplos.Quicksort
 
             
 
-            barcoPrincipal = new BarcoPlayer(100, 20, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh,0.05,loader);
-            barcoEnemigo = new BarcoBot(100, 25,100, ACELERACION, 18, meshBot, 0.05,barcoPrincipal,loader);
+            barcoPrincipal = new BarcoPlayer(100, 50, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh,0.05,loader);
+            barcoEnemigo = new BarcoBot(100, 35,100, ACELERACION, 18, meshBot, 0.05,barcoPrincipal,loader);
             barcoPrincipal.BarcoEnemigo = barcoEnemigo;
 
             // iluminacion en los barcos
-            barcoPrincipal.Mesh.Effect = efectosAguaIluminacion;
-            barcoPrincipal.Mesh.Technique = "EnvironmentMapTechnique";
+            barcoPrincipal.Mesh.Effect =GuiController.Instance.Shaders.TgcMeshPointLightShader;// efectosAguaIluminacion;
+            barcoPrincipal.Mesh.Technique = GuiController.Instance.Shaders.getTgcMeshTechnique(barcoPrincipal.Mesh.RenderType); //"EnvironmentMapTechnique";
 
-            barcoEnemigo.Mesh.Effect = efectosAguaIluminacion;
-            barcoEnemigo.Mesh.Technique = "EnvironmentMapTechnique";
+            barcoEnemigo.Mesh.Effect = GuiController.Instance.Shaders.TgcMeshPointLightShader; //efectosAguaIluminacion;
+            barcoEnemigo.Mesh.Technique = GuiController.Instance.Shaders.getTgcMeshTechnique(barcoEnemigo.Mesh.RenderType);//"EnvironmentMapTechnique";
 
             //Camara en tercera persona focuseada en el barco (canoa) 
 
@@ -256,12 +270,12 @@ namespace AlumnoEjemplos.Quicksort
             //PARA DESARROLLO DEL ESCENARIO ES MEJOR MOVERSE CON ESTA CAMARA
             GuiController.Instance.FpsCamera.Enable = true;
 
-            GuiController.Instance.Modifiers.addFloat("reflection", 0, 1, 0.35f);
+            //GuiController.Instance.Modifiers.addFloat("reflection", 0, 1, 0.35f);
             GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-200, 0, -200), new Vector3(200, 1000, 200), new Vector3(0, 900, 0));
             GuiController.Instance.Modifiers.addColor("lightColor", Color.LightYellow);
-            GuiController.Instance.Modifiers.addFloat("bumpiness", 0, 1, 1f);
+            //GuiController.Instance.Modifiers.addFloat("bumpiness", 0, 1, 1f);
             GuiController.Instance.Modifiers.addFloat("lightIntensity", 0, 150, 100);
-            GuiController.Instance.Modifiers.addFloat("lightAttenuation", 0.1f, 2, 0.3f);
+            GuiController.Instance.Modifiers.addFloat("lightAttenuation", 0.1f, 2, 0.1f);
             GuiController.Instance.Modifiers.addFloat("specularEx", 0, 20, 9f);
             
 
@@ -273,31 +287,68 @@ namespace AlumnoEjemplos.Quicksort
             //Carpeta de archivos Media del alumno
             //string alumnoMediaFolder = GuiController.Instance.AlumnoEjemplosMediaDir;
 
+            Mapa.oceano_mesh = oceano;
+
 
         }
 
         public override void render(float elapsedTime)
         {
-            //seleccion = true;
-            //if (seleccion)
-            //{
-            //    //Iniciar dibujado de todos los Sprites de la escena (en este caso es solo uno)
-            //    GuiController.Instance.Drawer2D.beginDrawSprite();
 
-            //    //Dibujar sprite (si hubiese mas, deberian ir todos aquí)
-            //    sprite.render();
-            //    sprite2.render();
-                
-            //    //Finalizar el dibujado de Sprites
-            //    GuiController.Instance.Drawer2D.endDrawSprite();
-            //}
-            //else
+            //Device de DirectX para renderizar
+            Microsoft.DirectX.Direct3D.Device d3dDevice = GuiController.Instance.D3dDevice;
+            TgcD3dInput d3dInput = GuiController.Instance.D3dInput;
+            if (pausaActiva || !comenzoJuego)
             {
+                timemenu += elapsedTime;
+                //Iniciar dibujado de todos los Sprites de la escena (en este caso es solo uno)
+                GuiController.Instance.Drawer2D.beginDrawSprite();
 
+                //Dibujar sprite (si hubiese mas, deberian ir todos aquí)
+                spriteFondo.render();
 
+                spriteLetras.render();
 
-                //Device de DirectX para renderizar
-                Microsoft.DirectX.Direct3D.Device d3dDevice = GuiController.Instance.D3dDevice;
+                if (Convert.ToInt64(timemenu) % 2 != 0 && !comenzoJuego)
+                {
+                    spriteInicio.render();
+                }
+                
+
+                //Finalizar el dibujado de Sprites
+                GuiController.Instance.Drawer2D.endDrawSprite();
+
+                if (d3dInput.keyDown(Key.Space))
+                {
+                    if(!comenzoJuego)
+                    {
+                       comenzoJuego = true;
+                    }
+                }
+
+                if (d3dInput.keyDown(Key.P))
+                {
+                        pausaActiva = false;
+                 }
+            }
+            else
+            {
+                if (d3dInput.keyDown(Key.P))
+                {
+                     pausaActiva = true;
+                }
+
+                if (d3dInput.keyDown(Key.L))
+                {
+                    if (activar_efecto)
+                    {
+                        activar_efecto = false;
+                    }else
+                    {
+                        activar_efecto = true;
+                    }
+                }
+                
                 time += elapsedTime;
 
                 //Cargamos el Render Targer al cual se va a dibujar la escena 3D. Antes nos guardamos el surface original
@@ -385,11 +436,27 @@ namespace AlumnoEjemplos.Quicksort
             efectosAguaIluminacion.SetValue("aux_Tex", textura);
             efectosAguaIluminacion.SetValue("texDiffuseMap", diffuseMapTexture);
 
+            efectosAguaIluminacion.SetValue("lightColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["lightColor"]));
+            efectosAguaIluminacion.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
+            efectosAguaIluminacion.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(eyePosition));
+            efectosAguaIluminacion.SetValue("lightIntensity", (float)GuiController.Instance.Modifiers["lightIntensity"]);
+            //barcoPrincipal.Mesh.Effect.SetValue("bumpiness", (float)GuiController.Instance.Modifiers["bumpiness"]);
+            efectosAguaIluminacion.SetValue("lightAttenuation", (float)GuiController.Instance.Modifiers["lightAttenuation"]);
+            //barcoPrincipal.Mesh.Effect.SetValue("reflection", (float)GuiController.Instance.Modifiers["reflection"]);
+            efectosAguaIluminacion.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(GuiController.Instance.FpsCamera.getPosition()));
+            efectosAguaIluminacion.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
+
+            efectosAguaIluminacion.SetValue("materialEmissiveColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mEmissive"]));
+            efectosAguaIluminacion.SetValue("materialAmbientColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mAmbient"]));
+            efectosAguaIluminacion.SetValue("materialDiffuseColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mDiffuse"]));
+            efectosAguaIluminacion.SetValue("materialSpecularColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mSpecular"]));
+            efectosAguaIluminacion.SetValue("materialSpecularExp", (float)GuiController.Instance.Modifiers["specularEx"]);
+
             //Hacer que la camara siga al personaje en su nueva posicion
             // GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
             GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
 
-
+            oceano.render();
             //Dibujar objeto principal
             //Siempre primero hacer todos los cálculos de lógica e input y luego al final dibujar todo (ciclo update-render)
             if (barcoPrincipal.Vida > 0){
@@ -405,19 +472,34 @@ namespace AlumnoEjemplos.Quicksort
             barcoPrincipal.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
             barcoPrincipal.Mesh.Effect.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(eyePosition));
             barcoPrincipal.Mesh.Effect.SetValue("lightIntensity", (float)GuiController.Instance.Modifiers["lightIntensity"]);
-            barcoPrincipal.Mesh.Effect.SetValue("bumpiness", (float)GuiController.Instance.Modifiers["bumpiness"]);
+            //barcoPrincipal.Mesh.Effect.SetValue("bumpiness", (float)GuiController.Instance.Modifiers["bumpiness"]);
             barcoPrincipal.Mesh.Effect.SetValue("lightAttenuation", (float)GuiController.Instance.Modifiers["lightAttenuation"]);
-            barcoPrincipal.Mesh.Effect.SetValue("reflection", (float)GuiController.Instance.Modifiers["reflection"]);
+            //barcoPrincipal.Mesh.Effect.SetValue("reflection", (float)GuiController.Instance.Modifiers["reflection"]);
+            barcoPrincipal.Mesh.Effect.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(GuiController.Instance.FpsCamera.getPosition()));
+            barcoPrincipal.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
 
+            barcoPrincipal.Mesh.Effect.SetValue("materialEmissiveColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mEmissive"]));
+            barcoPrincipal.Mesh.Effect.SetValue("materialAmbientColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mAmbient"]));
+            barcoPrincipal.Mesh.Effect.SetValue("materialDiffuseColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mDiffuse"]));
+            barcoPrincipal.Mesh.Effect.SetValue("materialSpecularColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mSpecular"]));
+            barcoPrincipal.Mesh.Effect.SetValue("materialSpecularExp", (float)GuiController.Instance.Modifiers["specularEx"]);
             barcoPrincipal.Mesh.render();
 
             barcoEnemigo.Mesh.Effect.SetValue("lightColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["lightColor"]));
             barcoEnemigo.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
-            barcoEnemigo.Mesh.Effect.SetValue("bumpiness", (float)GuiController.Instance.Modifiers["bumpiness"]);
+            //barcoEnemigo.Mesh.Effect.SetValue("bumpiness", (float)GuiController.Instance.Modifiers["bumpiness"]);
             barcoEnemigo.Mesh.Effect.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(eyePosition));
             barcoEnemigo.Mesh.Effect.SetValue("lightIntensity", (float)GuiController.Instance.Modifiers["lightIntensity"]);
             barcoEnemigo.Mesh.Effect.SetValue("lightAttenuation", (float)GuiController.Instance.Modifiers["lightAttenuation"]);
-            barcoEnemigo.Mesh.Effect.SetValue("reflection", (float)GuiController.Instance.Modifiers["reflection"]);
+            //barcoEnemigo.Mesh.Effect.SetValue("reflection", (float)GuiController.Instance.Modifiers["reflection"]);
+            barcoEnemigo.Mesh.Effect.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(GuiController.Instance.FpsCamera.getPosition()));
+            barcoEnemigo.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
+
+            barcoEnemigo.Mesh.Effect.SetValue("materialEmissiveColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mEmissive"]));
+            barcoEnemigo.Mesh.Effect.SetValue("materialAmbientColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mAmbient"]));
+            barcoEnemigo.Mesh.Effect.SetValue("materialDiffuseColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mDiffuse"]));
+            barcoEnemigo.Mesh.Effect.SetValue("materialSpecularColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mSpecular"]));
+            barcoEnemigo.Mesh.Effect.SetValue("materialSpecularExp", (float)GuiController.Instance.Modifiers["specularEx"]);
 
             barcoEnemigo.Mesh.render();
 
@@ -460,7 +542,7 @@ namespace AlumnoEjemplos.Quicksort
             d3dDevice.RenderState.AlphaBlendEnable = ant_alpha;*/
            // agua.render();
             
-            oceano.render();
+            //oceano.render();
             sol.render();
             skyBox.render();
 
@@ -480,7 +562,7 @@ namespace AlumnoEjemplos.Quicksort
             d3dDevice.SetStreamSource(0, screenQuadVB, 0);
 
             //Ver si el efecto de alarma esta activado, configurar Technique del shader segun corresponda
-            bool activar_efecto = (bool)GuiController.Instance.Modifiers["activar_efecto"];
+            
             if (activar_efecto)
             {
                 effectlluvia.Technique = "AlarmaTechnique";

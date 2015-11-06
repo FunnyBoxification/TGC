@@ -30,6 +30,13 @@ float lightAttenuation; //Factor de atenuacion de la luz
 float bumpiness;
 const float3 BUMP_SMOOTH = { 0.5f, 0.5f, 1.0f };
 
+//float3 fvLightPosition = float3( -100.00, 100.00, -100.00 );
+//float3 fvEyePosition = float3( 0.00, 0.00, -100.00 );
+//float k_la = 0.3;							// luz ambiente global
+//float k_ld = 0.9;							// luz difusa
+//float k_ls = 0.4;							// luz specular
+//float fSpecularPower = 16.84;				// exponente de la luz specular
+
 
 float k_la = 0.7;							// luz ambiente global
 float k_ld = 0.4;							// luz difusa
@@ -107,6 +114,32 @@ struct VS_OUTPUT
     float4 vPosLight : TEXCOORD4;
 };
 
+struct PS_INPUT2 
+{
+	float2 Texcoord : TEXCOORD0;
+	float4 lightingPosition : TEXCOORD1;
+	float3 lightingNormal : TEXCOORD2;
+};
+
+//Input del Vertex Shader
+struct VS_INPUT2 
+{
+	float4 Position : POSITION0;
+	float3 Normal :   NORMAL0;
+	float4 Color : COLOR;
+	float2 Texcoord : TEXCOORD0;
+};
+
+//Output del Vertex Shader
+struct VS_OUTPUT4 
+{
+	float4 Position : POSITION0;
+	float2 Texcoord : TEXCOORD0;
+	float4 lightingPosition : TEXCOORD1;
+	float3 lightingNormal : TEXCOORD2;
+};
+
+
 // ------------------------------------
 // Shadow map
 #define SMAP_SIZE 512
@@ -132,30 +165,71 @@ struct VS_OUTPUT2
    float3 Norm :			TEXCOORD1;		// Normales
    float3 Pos :   			TEXCOORD2;		// Posicion real 3d
 };
+
+//Estructura para guardar datos de la Luz
+// struct LightSampleValues {
+	// float3 L;
+	// float iL;
+// };
+
+//Calcular valores de luz para Point Light
+// LightSampleValues computePointLightValues(in float4 surfacePosition)
+// {
+	// LightSampleValues values;
+	// values.L = lightPosition.xyz - surfacePosition.xyz;
+	// float dist = length(values.L);
+	// values.L = values.L / dist; // normalize
+	
+	// //attenuation
+	// float distAtten = dist * lightAttenuation;
+	
+	// values.iL = lightIntensity / distAtten;
+	// return values;
+// }
+
+/*-------------- Calculo de componentes: AMBIENT, DIFFUSE y SPECULAR ---------------*/
+
+//Calcular color RGB de Ambient
+// float3 computeAmbientComponent(in LightSampleValues light)
+// {
+	// return light.iL * lightColor * materialAmbientColor;
+// }
+
+// //Calcular color RGB de Diffuse
+// float3 computeDiffuseComponent(in float3 surfaceNormal, in LightSampleValues light)
+// {
+	// return light.iL * lightColor * materialDiffuseColor.rgb * max(0.0, dot(surfaceNormal, light.L));
+// }
+
+// //Calcular color RGB de Specular
+// float3 computeSpecularComponent(in float3 surfaceNormal, in float4 surfacePosition, in LightSampleValues light)
+// {
+	// float3 viewVector = normalize(-surfacePosition.xyz);
+	// float3 reflectionVector = 2.0 * dot(light.L, surfaceNormal) * surfaceNormal - light.L;
+	// return (dot(surfaceNormal, light.L) <= 0.0)
+			// ? float3(0.0,0.0,0.0)
+			// : (
+				// light.iL * lightColor * materialSpecularColor 
+				// * pow( max( 0.0, dot(reflectionVector, viewVector) ), materialSpecularExp )
+			// );
+// }
  
  VS_OUTPUT2 VSAgua( float4 Pos:POSITION0,float3 Normal:NORMAL, float2 Texcoord:TEXCOORD0)
 {
 
-   float A = 20;
-//	float L = 50;	// wavelength
-//	float w = 5*3.1416/L;
-	float Q = 0.5;
+   float A = 3;
+
    float3 P0 = Pos.xyz;
-   //float3 D = float3(1,1,0);
-  // float dotD = dot(P0.xy, D);
-float C = cos(0.005*P0.x - time);
-float S = sin(0.005*P0.z -  time);
+
+   float C = cos(0.08*P0.x - time);
+   float S = sin(0.08*P0.x -  time);
+
    VS_OUTPUT2 Output;
    
    Pos.x = P0.x;
-   //Pos.y = P0.y + A*(S+C);
-	float k = 10;
-	float vel = 0.005;
-	float sinarg = ( 5 + sin( k*(Pos.x-time*vel)) + 5 + cos(k*(Pos.z-time*vel)));
-//Pos.y = mul(15.0, sin(sinarg));
-Pos.y =  A * 10 * (C+S);
-
+   Pos.y =  (A+50) * (C + S) ;
    Pos.z = P0.z; 
+
    //Proyectar posicion
    Output.Position = mul( Pos, matWorldViewProj);
    //Propago  las coord. de textura 
@@ -168,6 +242,8 @@ Pos.y =  A * 10 * (C+S);
    return( Output );
 
 }
+
+
 
 
 float4 PSAgua(	float3 oPos: POSITION,
@@ -241,6 +317,55 @@ float4 PSAgua(	float3 oPos: POSITION,
 
 }
 
+//Pixel Shader para Point Light
+// float4 point_light_ps(PS_INPUT input) : COLOR0
+// {      
+	// //Calcular datos de iluminacion para Directional Light
+	// LightSampleValues light = computePointLightValues(input.lightingPosition);
+	
+	// //Sumar Emissive + Ambient + Diffuse
+	// float3 interpolatedNormal = normalize(input.lightingNormal);
+	// float4 diffuseLighting;
+	// diffuseLighting.rgb = materialEmissiveColor + computeAmbientComponent(light) + computeDiffuseComponent(interpolatedNormal, light);
+	// diffuseLighting.a = materialDiffuseColor.a;
+	
+	// //Calcular Specular por separado
+	// float4 specularLighting;
+	// specularLighting.rgb = computeSpecularComponent(interpolatedNormal, input.lightingPosition, light);
+	// specularLighting.a = 0;
+	
+	// //Obtener texel de la textura
+	// float4 texelColor = tex2D(diffuseMap, input.Texcoord);
+	
+	// //Modular Diffuse con color de la textura y sumar luego Specular
+	// float4 finalColor = diffuseLighting * texelColor + specularLighting;
+
+	
+	// return finalColor;
+// }
+
+// VS_OUTPUT4 vs_general(VS_INPUT input)
+// {
+	// VS_OUTPUT output;
+
+	// //Proyectar posicion
+	// output.Position = mul(input.Position, matWorldViewProj);
+
+	// //Las Coordenadas de textura quedan igual
+	// output.Texcoord = input.Texcoord;
+
+	// // The position and normal for lighting
+	// // must be in camera space, not homogeneous space
+	
+	// //Almacenar la posicion del vertice en ViewSpace para ser usada luego por la luz
+	// output.lightingPosition = mul(input.Position, matWorldView);
+	
+	// //Almacenar la normal del vertice en ViewSpace para ser usada luego por la luz
+	// output.lightingNormal = mul(input.Normal, matWorldView);
+
+	// return output;
+// }
+
 technique RenderAgua
 {
     pass p0
@@ -248,6 +373,12 @@ technique RenderAgua
         VertexShader = compile vs_3_0 VSAgua();
         PixelShader = compile ps_3_0 PSAgua();
     }
+	    //pass p1
+    //{
+        //VertexShader = compile vs_2_0 vs_general();
+        //PixelShader = compile  ps_2_0 point_light_ps();
+    //}
+
 }
 
 /**************************************************************************************/

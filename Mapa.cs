@@ -7,5 +7,6 @@ namespace AlumnoEjemplos.Quicksort
 {
     class Mapa
     {
+        public static SmartTerrain oceano_mesh;
     }
 }
