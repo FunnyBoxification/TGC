@@ -79,7 +79,7 @@ namespace AlumnoEjemplos.Quicksort
             else if (d3dInput.keyDown(Key.Q) && cooldown <= 0)
             {
                 this.dispararBala(0,0);
-                cooldown = 4;
+                cooldown = 2.5f;
 
 
             }else

@@ -261,19 +261,26 @@ namespace AlumnoEjemplos.Quicksort
 
             //Camara en tercera persona focuseada en el barco (canoa) 
 
-           /* GuiController.Instance.ThirdPersonCamera.Enable = true;
-            GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 900, -300);
-            GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
-            //GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(0));
-            GuiController.Instance.ThirdPersonCamera.TargetDisplacement = new Vector3(0, 45, 0);*/
+
+            GuiController.Instance.ThirdPersonCamera.Enable = true;
+           
+            GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 800, 600);
+            GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
+            GuiController.Instance.RotCamera.Enable = false;
+            
+            //GuiController.Instance.ThirdPersonCamera.Enable = true;
+            //GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 900, 200);
+            //GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
+            //GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
+            //GuiController.Instance.ThirdPersonCamera.TargetDisplacement = new Vector3(0, 45, 0);
 
 
             //PARA DESARROLLO DEL ESCENARIO ES MEJOR MOVERSE CON ESTA CAMARA
-            GuiController.Instance.FpsCamera.Enable = true;
-            GuiController.Instance.FpsCamera.Velocity = new Vector3(0.0f,0.0f,0.0f);
-            GuiController.Instance.FpsCamera.JumpSpeed = 0f;
-            GuiController.Instance.FpsCamera.setCamera(new Vector3(0f,700f,-2300f), new Vector3(900f, 100f, -300f));
-            //GuiController.Instance.Fog.Enabled = true;
+            //GuiController.Instance.FpsCamera.Enable = true;
+            //GuiController.Instance.FpsCamera.Velocity = new Vector3(0.0f,0.0f,0.0f);
+            //GuiController.Instance.FpsCamera.JumpSpeed = 0f;
+            //GuiController.Instance.FpsCamera.setCamera(new Vector3(0f,700f,-2300f), new Vector3(900f, 100f, -300f));
+            ////GuiController.Instance.Fog.Enabled = true;
 
 
             //GuiController.Instance.Modifiers.addFloat("reflection", 0, 1, 0.35f);
@@ -424,7 +431,7 @@ namespace AlumnoEjemplos.Quicksort
             //Actualzar posición de la luz
             Vector3 lightPos = (Vector3)GuiController.Instance.Modifiers["lightPos"];
             sol.Position = lightPos;
-            Vector3 eyePosition = GuiController.Instance.FpsCamera.getPosition();
+            Vector3 eyePosition = GuiController.Instance.ThirdPersonCamera.getPosition();
 
             if (g_pCubeMapAgua != null)
             {
@@ -449,7 +456,7 @@ namespace AlumnoEjemplos.Quicksort
             //barcoPrincipal.Mesh.Effect.SetValue("bumpiness", (float)GuiController.Instance.Modifiers["bumpiness"]);
             efectosAguaIluminacion.SetValue("lightAttenuation", (float)GuiController.Instance.Modifiers["lightAttenuation"]);
             //barcoPrincipal.Mesh.Effect.SetValue("reflection", (float)GuiController.Instance.Modifiers["reflection"]);
-            efectosAguaIluminacion.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(GuiController.Instance.FpsCamera.getPosition()));
+            efectosAguaIluminacion.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(GuiController.Instance.ThirdPersonCamera.getPosition()));
             efectosAguaIluminacion.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
 
             efectosAguaIluminacion.SetValue("materialEmissiveColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mEmissive"]));
@@ -459,7 +466,7 @@ namespace AlumnoEjemplos.Quicksort
             efectosAguaIluminacion.SetValue("materialSpecularExp", (float)GuiController.Instance.Modifiers["specularEx"]);
 
             //Hacer que la camara siga al personaje en su nueva posicion
-            // GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
+    
             GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
 
             oceano.render();

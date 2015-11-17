@@ -136,32 +136,63 @@ namespace AlumnoEjemplos.Quicksort
 
         public void colocarAltura(float time)
         {
-            float y = Calculo(time);
+            float y = Calculo(time,Mesh.Position.X);
             //Vector3 ejeX = new Vector3(1, 0, 0);
-            Vector3 vectplanchado1 = new Vector3(this.Mesh.Position.X, y, this.Mesh.Position.Z);
-            Vector3 vectnDireccion1 = Vector3.Normalize(vectplanchado1 - PosAntes);
+            //Vector3 vectplanchado1 = new Vector3(this.Mesh.Position.X, y, this.Mesh.Position.Z);
+            //Vector3 vectnDireccion1 = Vector3.Normalize(vectplanchado1 - PosAntes);
             Mesh.move(0, (float)y+0.025f, 0);
 
-            Vector3 ejeX = new Vector3(1f, 0f, 0f);
-            Mesh.rotateY((float)Math.Acos(Vector3.Dot(vectnDireccion1, ejeX)));
-            PosAntes = Mesh.Position;
+            float z = FastMath.Cos(Mesh.Rotation.Y);
+            float x = FastMath.Sin(Mesh.Rotation.Y);
+            Vector3 vectDireccion1 = moverVector(new Vector3(x, 0, z),Mesh,5);
+            Vector3 vectDireccion2 = moverVector(new Vector3(x, 0, z), Mesh, -5);
+            
+
+            float ypos = Calculo(time,vectDireccion1.X );
+            float yant = Calculo(time, vectDireccion2.X );
+            
+            if (ypos > yant)
+            {
+                Mesh.rotateX(0.001f);
+            }
+            else if (ypos < yant)
+            {
+                Mesh.rotateX(-0.001f);
+            }
+
+            //Vector3 ejeX = new Vector3(1f, 0f, 0f);
+            //Mesh.rotateX((float)Math.Acos(Vector3.Dot(vectnDireccion1, ejeX)));
+            //PosAntes = Mesh.Position;
 
         }
+
+        public Vector3 moverVector(Vector3 vect,TgcMesh  mesh, float mov)
+        {
+            float z = FastMath.Cos(mesh.Rotation.Y) * mov;
+            float x = FastMath.Sin(mesh.Rotation.Y) * mov;
+
+            vect.X += x;
+            vect.Z += z;
+            return vect;
+            
+        }
+
+
         public void volverAltura(float time)
         {
-            float y = Calculo( time);
+            float y = Calculo( time,Mesh.Position.X);
 
             Mesh.move(0, -(float)y, 0);
         }
 
-        private float Calculo(float time)
+        private float Calculo(float time, float x1)
         {
             //pruebo altura de ola
             float A = 53f;
             /*double L = 50;	// wavelength
             double w = 5f * 3.1416f / L;
             double Q = 0.5f;*/
-            float x = Mesh.Position.X /50;
+            float x = x1 /50;
             
             float y = Mesh.Position.Y;
             //float3 D = float3(1,1,0);
