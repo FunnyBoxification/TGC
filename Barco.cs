@@ -136,7 +136,7 @@ namespace AlumnoEjemplos.Quicksort
         {
             float y = Calculo(time);
 
-            Mesh.move(0, (float)y, 0);
+            Mesh.move(0, (float)y+0.025f, 0);
         }
         public void volverAltura(float time)
         {

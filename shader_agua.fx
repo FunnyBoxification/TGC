@@ -119,6 +119,8 @@ struct PS_INPUT2
 	float2 Texcoord : TEXCOORD0;
 	float4 lightingPosition : TEXCOORD1;
 	float3 lightingNormal : TEXCOORD2;
+	float3 wsPos: TEXCOORD3;
+	float4 vPosLight : TEXCOORD4;
 };
 
 //Input del Vertex Shader
@@ -192,7 +194,7 @@ LightSampleValues computePointLightValues(in float4 surfacePosition)
 //Calcular color RGB de Ambient
 float3 computeAmbientComponent(in LightSampleValues light)
 {
-	return light.iL * lightColor * materialAmbientColor;
+	return light.iL * lightColor * materialAmbientColor * 2.1;
 }
 
 // //Calcular color RGB de Diffuse
@@ -205,7 +207,7 @@ float3 computeDiffuseComponent(in float3 surfaceNormal, in LightSampleValues lig
 float3 computeSpecularComponent(in float3 surfaceNormal, in float4 surfacePosition, in LightSampleValues light)
 {
 	float3 viewVector = normalize(-surfacePosition.xyz);
-	float3 reflectionVector = 2.0 * dot(light.L, surfaceNormal) * surfaceNormal - light.L;
+	float3 reflectionVector = 3.0 * dot(light.L, surfaceNormal) * surfaceNormal - light.L;
 	return (dot(surfaceNormal, light.L) <= 0.0)
 			? float3(0.0,0.0,0.0)
 			: (
@@ -276,8 +278,8 @@ float4 PSAgua(	float3 oPos: POSITION,
 	// enviroment map 
 	float dist = distance(float2(x,y),float2(0,0));
 	float fp = cos( k*dist+time*vel)*k/dist*0.01;
-	//float3 vN = float3(0,1,0);
-	float3 vN = normalize(float3(-fp*(x-0),1,-fp*(y-0)/2));
+	float3 vN = float3(0,1,0);
+	//float3 vN = normalize(float3(-fp*(x-0),1,-fp*(y-0)/2));
 	
 
 	// necesito los valores en Worlds Space para acceder al cubemap
@@ -286,9 +288,9 @@ float4 PSAgua(	float3 oPos: POSITION,
     	float3 EnvTex = reflect(vEyeR,vN);
 	float4 color_reflejado = texCUBE( g_samCubeMapAgua, EnvTex);
 	// Refraccion
-    	float3 EnvTex1 = refract(vEyeR,-vN,1.001);
-    	float3 EnvTex2 = refract(vEyeR,-vN,1.009);
-    	float3 EnvTex3 = refract(vEyeR,-vN,1.02);
+    	float3 EnvTex1 = refract(vEyeR,-vN,0);
+    	float3 EnvTex2 = refract(vEyeR,-vN,0);
+    	float3 EnvTex3 = refract(vEyeR,-vN,0);
 	float4 color_refractado = float4(
 			tex2D( auxMap, float2(EnvTex1.x+1,-EnvTex1.z+1)*0.5).x,
 			tex2D( auxMap, float2(EnvTex2.x+1,-EnvTex2.z+1)*0.5).y,
@@ -332,10 +334,34 @@ float4 point_light_ps( PS_INPUT2 input ) : COLOR0
 	//Calcular Specular por separado
 	float4 specularLighting;
 	specularLighting.rgb = computeSpecularComponent(interpolatedNormal, input.lightingPosition, light);
-	specularLighting.a = 0;
+	specularLighting.a = 0.5;
 	
 	//Obtener texel de la textura
 	float4 texelColor = saturate(tex2D(auxMap, input.Texcoord)) * 0.65465;
+	
+	float x = input.lightingNormal.x/250.0;
+	float y = input.lightingNormal.y/250.0;
+	float dist = distance(float2(x,y),float2(0,0));
+	float k = 1;
+	float vel = -2;
+	float fp = cos( k*dist+time*vel)*k/dist*0.01;
+	//float3 vN = float3(0,1,0);
+	float3 vN = normalize(float3(-fp*(x-0),1,-fp*(y-0)/2));
+	
+	// Refraction
+	float3 vEyeR = normalize(input.wsPos-fvEyePosition);
+	
+    float3 EnvTex1 = refract(vEyeR,-vN,1.001);
+	float3 EnvTex2 = refract(vEyeR,-vN,1.009);
+	float3 EnvTex3 = refract(vEyeR,-vN,1.02);
+	float4 color_refractado = float4(
+			tex2D( auxMap, float2(EnvTex1.x+1,-EnvTex1.z+1)*0.5).x,
+			tex2D( auxMap, float2(EnvTex2.x+1,-EnvTex2.z+1)*0.5).y,
+			tex2D( auxMap, float2(EnvTex3.x+1,-EnvTex3.z+1)*0.5).z,
+			1);
+	float Fresnel = 0.1 + 0.1*pow(1 + abs(dot(vN,vEyeR)),7);    
+	float4 fvBaseColor = color_refractado*(1-Fresnel);
+	fvBaseColor.a = 0.5 + (1-Fresnel)*0.5;
 	
 	//Modular Diffuse con color de la textura y sumar luego Specular
 	float4 finalColor = diffuseLighting * texelColor + specularLighting * float4(32,193,84,1);
@@ -375,8 +401,8 @@ technique RenderAgua
     }
 	pass p1
     {
-        VertexShader = compile vs_2_0 VSAgua();
-        PixelShader = compile  ps_2_0 point_light_ps();
+        VertexShader = compile vs_3_0 VSAgua();
+        PixelShader = compile  ps_3_0 point_light_ps();
     }
 
 }

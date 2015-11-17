@@ -185,7 +185,7 @@ namespace AlumnoEjemplos.Quicksort
 
             //inicio//
 
-            Bitmap b = (Bitmap)Bitmap.FromFile(GuiController.Instance.AlumnoEjemplosMediaDir +  "agua.bmp");
+            Bitmap b = (Bitmap)Bitmap.FromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "water_water_0056_01_preview.jpg");
             b.RotateFlip(RotateFlipType.Rotate90FlipX);
             textura = Texture.FromBitmap(d3dDevice, b, Usage.None, Pool.Managed);
 
@@ -196,7 +196,8 @@ namespace AlumnoEjemplos.Quicksort
             oceano = new SmartTerrain();
             //oceano.loadHeightmap(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg", 30.00f, 1.0f, new Vector3(0, 0, 0));
             oceano.loadPlainHeightmap(256, 256, 0, 50.0f, 1.0f, new Vector3(0, 0, 0));
-            oceano.loadTexture(GuiController.Instance.ExamplesMediaDir + "Heighmaps\\" + "TerrainTexture1-256x256.jpg");
+            oceano.loadTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "water_water_0056_01_preview.jpg");
+     
             
             TgcSceneLoader loader = new TgcSceneLoader();
             //escena = loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Scenes\\Isla\\Isla-TgcScene.xml");
@@ -260,22 +261,23 @@ namespace AlumnoEjemplos.Quicksort
 
             //Camara en tercera persona focuseada en el barco (canoa) 
 
-            /*GuiController.Instance.ThirdPersonCamera.Enable = true;
-            GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 200, 300);
-            GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
-            GuiController.Instance.RotCamera.Enable = false;*/
+           /* GuiController.Instance.ThirdPersonCamera.Enable = true;
+            GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 900, -300);
+            GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
+            //GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(0));
+            GuiController.Instance.ThirdPersonCamera.TargetDisplacement = new Vector3(0, 45, 0);*/
 
 
             //PARA DESARROLLO DEL ESCENARIO ES MEJOR MOVERSE CON ESTA CAMARA
             GuiController.Instance.FpsCamera.Enable = true;
 
             //GuiController.Instance.Modifiers.addFloat("reflection", 0, 1, 0.35f);
-            GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-200, 0, -200), new Vector3(200, 1000, 200), new Vector3(0, 900, 0));
+            GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-3000, 0, -3000), new Vector3(3000, 3000, 3000), new Vector3(0, 900, -2400));
             GuiController.Instance.Modifiers.addColor("lightColor", Color.LightYellow);
             //GuiController.Instance.Modifiers.addFloat("bumpiness", 0, 1, 1f);
-            GuiController.Instance.Modifiers.addFloat("lightIntensity", 0, 150, 100);
+            GuiController.Instance.Modifiers.addFloat("lightIntensity", 0, 500, 150);
             GuiController.Instance.Modifiers.addFloat("lightAttenuation", 0.1f, 2, 0.1f);
-            GuiController.Instance.Modifiers.addFloat("specularEx", 0, 20, 9f);
+            GuiController.Instance.Modifiers.addFloat("specularEx", 0, 100, 20f);
             
 
             GuiController.Instance.Modifiers.addColor("mEmissive", Color.Black);
