@@ -270,6 +270,11 @@ namespace AlumnoEjemplos.Quicksort
 
             //PARA DESARROLLO DEL ESCENARIO ES MEJOR MOVERSE CON ESTA CAMARA
             GuiController.Instance.FpsCamera.Enable = true;
+            GuiController.Instance.FpsCamera.Velocity = new Vector3(0.0f,0.0f,0.0f);
+            GuiController.Instance.FpsCamera.JumpSpeed = 0f;
+            GuiController.Instance.FpsCamera.setCamera(new Vector3(0f,700f,-2300f), new Vector3(900f, 100f, -300f));
+            //GuiController.Instance.Fog.Enabled = true;
+
 
             //GuiController.Instance.Modifiers.addFloat("reflection", 0, 1, 0.35f);
             GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-3000, 0, -3000), new Vector3(3000, 3000, 3000), new Vector3(0, 900, -2400));
