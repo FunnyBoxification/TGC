@@ -31,6 +31,7 @@ namespace AlumnoEjemplos.Quicksort
         public TgcSceneLoader Loader{get;set;}
         public List<Bala> balas{get;set;}
         public Barco BarcoEnemigo { get; set; }
+        public Vector3 PosAntes { get; set; }
 
         public Barco(int vida, int danio, double velocidad, double rotacion, TgcMesh mesh,double potencia, TgcSceneLoader ldr)
         {
@@ -43,6 +44,7 @@ namespace AlumnoEjemplos.Quicksort
             VelocidadMov = 0;
             VelocidadRot = 0;
             Loader = ldr;
+            PosAntes = new Vector3(0f,0f,0f);
             balas = new List<Bala>();
         }
 
@@ -135,8 +137,15 @@ namespace AlumnoEjemplos.Quicksort
         public void colocarAltura(float time)
         {
             float y = Calculo(time);
-
+            //Vector3 ejeX = new Vector3(1, 0, 0);
+            Vector3 vectplanchado1 = new Vector3(this.Mesh.Position.X, y, this.Mesh.Position.Z);
+            Vector3 vectnDireccion1 = Vector3.Normalize(vectplanchado1 - PosAntes);
             Mesh.move(0, (float)y+0.025f, 0);
+
+            Vector3 ejeX = new Vector3(1f, 0f, 0f);
+            Mesh.rotateY((float)Math.Acos(Vector3.Dot(vectnDireccion1, ejeX)));
+            PosAntes = Mesh.Position;
+
         }
         public void volverAltura(float time)
         {
