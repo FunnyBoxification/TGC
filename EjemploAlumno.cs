@@ -346,6 +346,26 @@ namespace AlumnoEjemplos.Quicksort
             }
             else
             {
+                if (d3dInput.keyDown(Key.C))
+                {
+                    if (GuiController.Instance.ThirdPersonCamera.Enable)
+                    {
+                        GuiController.Instance.ThirdPersonCamera.Enable = false;
+                        GuiController.Instance.FpsCamera.Enable = true;
+                        GuiController.Instance.FpsCamera.Velocity = new Vector3(0.0f, 0.0f, 0.0f);
+                        GuiController.Instance.FpsCamera.JumpSpeed = 0f;
+                        GuiController.Instance.FpsCamera.setCamera(new Vector3(0f, 700f, -2300f), new Vector3(900f, 100f, -300f));
+                    }
+                    else
+                    {
+                        GuiController.Instance.ThirdPersonCamera.Enable = true;
+                        GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 900, -200);
+                        GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
+                        GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
+                        GuiController.Instance.ThirdPersonCamera.TargetDisplacement = new Vector3(0, 45, 0);
+                        GuiController.Instance.FpsCamera.Enable = false;
+                    }
+                }
                 if (d3dInput.keyDown(Key.P))
                 {
                      pausaActiva = true;
