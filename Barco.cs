@@ -185,6 +185,13 @@ namespace AlumnoEjemplos.Quicksort
             Mesh.move(0, -(float)y, 0);
         }
 
+        public void hundir(float elapsedtime)
+        {
+            Mesh.rotateX(0.1f * elapsedtime);
+            Mesh.move(0, -10 * elapsedtime, 0);
+
+        }
+
         private float Calculo(float time, float x1)
         {
             //pruebo altura de ola
@@ -225,11 +232,11 @@ namespace AlumnoEjemplos.Quicksort
             {
                 if (Vector3.Cross(Mesh.Rotation, vectDireccion).Y < 0)//el barco esta a la izq
                 {
-                    return 1.1f; //dispara der
+                    return 1.15f; //dispara der
                 }
                 if (Vector3.Cross(Mesh.Rotation, vectDireccion).Y > 0) //el barco esta a la derecha o atras
                 {
-                    return 0.9f; //dispara izq
+                    return 0.85f; //dispara izq
                 }
                  
             }
@@ -237,5 +244,7 @@ namespace AlumnoEjemplos.Quicksort
         }
 
 
+
+        public bool dañado { get; set; }
     }
 }

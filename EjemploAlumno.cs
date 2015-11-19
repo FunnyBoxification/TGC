@@ -61,6 +61,7 @@ namespace AlumnoEjemplos.Quicksort
         Matrix g_LightView;						// matriz de view del light
         float alfa_sol;             // pos. del sol
         TgcBox sol;
+        bool cerca;
 
        //inicio
         TgcSprite spriteFondo;
@@ -262,24 +263,14 @@ namespace AlumnoEjemplos.Quicksort
             //Camara en tercera persona focuseada en el barco (canoa) 
 
 
-            /*GuiController.Instance.ThirdPersonCamera.Enable = true;
-           
-            GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 900, 600);
-            GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
-            GuiController.Instance.RotCamera.Enable = false;*/
-            
-            //GuiController.Instance.ThirdPersonCamera.Enable = true;
-            //GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 900, 200);
-            //GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
-            //GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
-            //GuiController.Instance.ThirdPersonCamera.TargetDisplacement = new Vector3(0, 45, 0);
-
+         
 
             //PARA DESARROLLO DEL ESCENARIO ES MEJOR MOVERSE CON ESTA CAMARA
             GuiController.Instance.FpsCamera.Enable = true;
             GuiController.Instance.FpsCamera.Velocity = new Vector3(0.0f,0.0f,0.0f);
             GuiController.Instance.FpsCamera.JumpSpeed = 0f;
             GuiController.Instance.FpsCamera.setCamera(new Vector3(0f,700f,-2300f), new Vector3(900f, 100f, -300f));
+            GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
             ////GuiController.Instance.Fog.Enabled = true;
 
 
@@ -346,9 +337,9 @@ namespace AlumnoEjemplos.Quicksort
             }
             else
             {
-                if (d3dInput.keyDown(Key.C))
+                if (d3dInput.keyPressed(Key.C))
                 {
-                    if (GuiController.Instance.ThirdPersonCamera.Enable)
+                    if (GuiController.Instance.ThirdPersonCamera.Enable && cerca == true)
                     {
                         GuiController.Instance.ThirdPersonCamera.Enable = false;
                         GuiController.Instance.FpsCamera.Enable = true;
@@ -356,22 +347,34 @@ namespace AlumnoEjemplos.Quicksort
                         GuiController.Instance.FpsCamera.JumpSpeed = 0f;
                         GuiController.Instance.FpsCamera.setCamera(new Vector3(0f, 700f, -2300f), new Vector3(900f, 100f, -300f));
                     }
+                    else if (cerca == true)
+                    {
+                        GuiController.Instance.ThirdPersonCamera.Enable = true;
+
+                        GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 800, 1000);
+
+                        GuiController.Instance.RotCamera.Enable = false;
+                        GuiController.Instance.FpsCamera.Enable = false;
+                        cerca = false;
+                        
+                    }
                     else
                     {
                         GuiController.Instance.ThirdPersonCamera.Enable = true;
-                        GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 900, -200);
-                        GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
-                        GuiController.Instance.ThirdPersonCamera.rotateY(Geometry.DegreeToRadian(180));
-                        GuiController.Instance.ThirdPersonCamera.TargetDisplacement = new Vector3(0, 45, 0);
+
+                        GuiController.Instance.ThirdPersonCamera.setCamera(barcoPrincipal.Mesh.Position, 300, 500);
+
+                        GuiController.Instance.RotCamera.Enable = false;
                         GuiController.Instance.FpsCamera.Enable = false;
+                        cerca = true;
                     }
                 }
-                if (d3dInput.keyDown(Key.P))
+                if (d3dInput.keyPressed(Key.P))
                 {
                      pausaActiva = true;
                 }
 
-                if (d3dInput.keyDown(Key.L))
+                if (d3dInput.keyPressed(Key.L))
                 {
                     if (activar_efecto)
                     {
@@ -414,7 +417,7 @@ namespace AlumnoEjemplos.Quicksort
 
         private void checkearVidas(Barco barco)
         {
-            if (barco.Vida < 0)
+            if (barco.Vida <= 0)
             {
                 barco.Mesh.setColor(Color.Red);
             }
@@ -488,20 +491,31 @@ namespace AlumnoEjemplos.Quicksort
             //Hacer que la camara siga al personaje en su nueva posicion
     
             GuiController.Instance.ThirdPersonCamera.Target = barcoPrincipal.Mesh.Position;
+            
 
             oceano.render();
             //Dibujar objeto principal
             //Siempre primero hacer todos los cálculos de lógica e input y luego al final dibujar todo (ciclo update-render)
             barcoPrincipal.colocarAltura(time);
             barcoEnemigo.colocarAltura(time);
-            if (barcoPrincipal.Vida > 0){
-            barcoPrincipal.Movimiento(elapsedTime);
+            if (barcoPrincipal.Vida > 0)
+            {
+                barcoPrincipal.Movimiento(elapsedTime);
+            }
+            else
+            {
+                barcoPrincipal.hundir(elapsedTime);
             }
              if (barcoEnemigo.Vida > 0){
             barcoEnemigo.Movimiento(elapsedTime);
              }
-            
+             else
+             {
+                 barcoEnemigo.hundir(elapsedTime);
+             }
 
+             checkearVidas(barcoEnemigo);
+             checkearVidas(barcoPrincipal);
             barcoPrincipal.Mesh.Effect.SetValue("lightColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["lightColor"]));
             barcoPrincipal.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
             barcoPrincipal.Mesh.Effect.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(eyePosition));
@@ -560,23 +574,8 @@ namespace AlumnoEjemplos.Quicksort
                 }
             }
 
-            checkearVidas(barcoEnemigo);
-            checkearVidas(barcoPrincipal);
-            //Dibujamos la escena
-            //escena.renderAll();
-            /*Blend ant_src = d3dDevice.RenderState.SourceBlend;
-            Blend ant_dest = d3dDevice.RenderState.DestinationBlend;
-            bool ant_alpha = d3dDevice.RenderState.AlphaBlendEnable;
-            d3dDevice.RenderState.AlphaBlendEnable = true;
-            d3dDevice.RenderState.SourceBlend = Blend.SourceColor;
-            d3dDevice.RenderState.DestinationBlend = Blend.InvSourceColor;
-            //agua.render();
-            d3dDevice.RenderState.SourceBlend = ant_src;
-            d3dDevice.RenderState.DestinationBlend = ant_dest;
-            d3dDevice.RenderState.AlphaBlendEnable = ant_alpha;*/
-           // agua.render();
             
-            //oceano.render();
+           
             sol.render();
             skyBox.render();
 
@@ -634,97 +633,7 @@ namespace AlumnoEjemplos.Quicksort
             meshBot.dispose();
         }
 
-       /* public void CrearEnvMapAgua()
-        {
-            // creo el enviroment map para el agua
-            Microsoft.DirectX.Direct3D.Device device = GuiController.Instance.D3dDevice;
-            g_pCubeMapAgua = new CubeTexture(device, 256, 1, Usage.RenderTarget,
-                Format.A16B16G16R16F, Pool.Default);
-            Surface pOldRT = device.GetRenderTarget(0);
-            // ojo: es fundamental que el fov sea de 90 grados.
-            // asi que re-genero la matriz de proyeccion
-            device.Transform.Projection =
-                Matrix.PerspectiveFovLH(Geometry.DegreeToRadian(90.0f),
-                    1f, near_plane, far_plane);
-            // Genero las caras del enviroment map
-            for (CubeMapFace nFace = CubeMapFace.PositiveX; nFace <= CubeMapFace.NegativeZ; ++nFace)
-            {
-                Surface pFace = g_pCubeMapAgua.GetCubeMapSurface(nFace, 0);
-                device.SetRenderTarget(0, pFace);
-                Vector3 Dir, VUP;
-                Color color;
-                switch (nFace)
-                {
-                    default:
-                    case CubeMapFace.PositiveX:
-                        // Left
-                        Dir = new Vector3(1, 0, 0);
-                        VUP = new Vector3(0, 1, 0);
-                        color = Color.Black;
-                        break;
-                    case CubeMapFace.NegativeX:
-                        // Right
-                        Dir = new Vector3(-1, 0, 0);
-                        VUP = new Vector3(0, 1, 0);
-                        color = Color.Red;
-                        break;
-                    case CubeMapFace.PositiveY:
-                        // Up
-                        Dir = new Vector3(0, 1, 0);
-                        VUP = new Vector3(0, 0, -1);
-                        color = Color.Gray;
-                        break;
-                    case CubeMapFace.NegativeY:
-                        // Down
-                        Dir = new Vector3(0, -1, 0);
-                        VUP = new Vector3(0, 0, 1);
-                        color = Color.Yellow;
-                        break;
-                    case CubeMapFace.PositiveZ:
-                        // Front
-                        Dir = new Vector3(0, 0, 1);
-                        VUP = new Vector3(0, 1, 0);
-                        color = Color.Green;
-                        break;
-                    case CubeMapFace.NegativeZ:
-                        // Back
-                        Dir = new Vector3(0, 0, -1);
-                        VUP = new Vector3(0, 1, 0);
-                        color = Color.Blue;
-                        break;
-                }
-
-                Vector3 Pos = new Vector3(0, 0, 0);//agua.Position;
-                if (nFace == CubeMapFace.NegativeY)
-                    Pos.Y += 2000;
-
-                device.Transform.View = Matrix.LookAtLH(Pos, Pos + Dir, VUP);
-                device.Clear(ClearFlags.Target | ClearFlags.ZBuffer, color, 1.0f, 0);
-                //device.BeginScene();
-                //Renderizar: solo algunas cosas:
-                /*if (nFace == CubeMapFace.NegativeY)
-                {
-                    //Renderizar terreno
-                    terrain.render();
-                }
-                else
-                {
-                    //Renderizar SkyBox
-                    skyBox.render();
-                    // dibujo el bosque
-                    foreach (TgcMesh instance in bosque)
-                        instance.render();
-                }*/
-                //string fname = string.Format("face{0:D}.bmp", nFace);
-                //SurfaceLoader.Save(fname, ImageFileFormat.Bmp, pFace);
-
-                //device.EndScene();
-            //}
-            // restuaro el render target
-           // device.SetRenderTarget(0, pOldRT);
-        //}*/
-
-
+       
 
         
     }

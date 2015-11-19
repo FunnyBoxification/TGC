@@ -51,6 +51,7 @@ namespace AlumnoEjemplos.Quicksort
                 {
                     BarcoEnemigo.Vida = BarcoEnemigo.Vida - danio;
                     col = true;
+                  
                 }
             }
             //foreach (TgcMesh mesh in EjemploAlumno.getEscenaMeshes())
