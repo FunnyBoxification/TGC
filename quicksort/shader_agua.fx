@@ -235,7 +235,7 @@ float3 computeSpecularComponent(in float3 surfaceNormal, in float4 surfacePositi
    //Proyectar posicion
    Output.Position = mul( Pos, matWorldViewProj);
    //Propago  las coord. de textura 
-   Output.Texcoord  = Texcoord;
+   Output.Texcoord  = Texcoord + time/70 ;
    // Calculo la posicion real
    Output.Pos = mul(Pos,matWorld).xyz;
    // Transformo la normal y la normalizo
@@ -364,7 +364,8 @@ float4 point_light_ps( PS_INPUT2 input ) : COLOR0
 	fvBaseColor.a = 0.5 + (1-Fresnel)*0.5;
 	
 	//Modular Diffuse con color de la textura y sumar luego Specular
-	float4 finalColor = diffuseLighting * texelColor + specularLighting * float4(32,193,84,1);
+	float4 finalColor = diffuseLighting * texelColor + specularLighting * float4(32,193,84,0.5);
+	finalColor.a = 0;
 
 	
 	return finalColor;
