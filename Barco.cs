@@ -55,11 +55,14 @@ namespace AlumnoEjemplos.Quicksort
             {
                 TgcScene scene2 = Loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Armas\\Hacha\\Bala-TgcScene.xml");
                 balaMesh = scene2.Meshes[0];
+                balaMesh.Scale = new Vector3(3f, 3f, 3f);
+
             }
             else
             {
                 TgcScene scene2 = Loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Armas\\Hacha\\Hacha-TgcScene.xml");
                 balaMesh = scene2.Meshes[0];
+                balaMesh.Scale = new Vector3(2f, 2f, 2f);
             }
             
             var pos = this.Mesh.Position;
@@ -187,7 +190,7 @@ namespace AlumnoEjemplos.Quicksort
 
         public void hundir(float elapsedtime)
         {
-            Mesh.rotateX(0.1f * elapsedtime);
+            Mesh.rotateX(0.07f * elapsedtime);
             Mesh.move(0, -10 * elapsedtime, 0);
 
         }

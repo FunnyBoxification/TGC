@@ -60,7 +60,7 @@ namespace AlumnoEjemplos.Quicksort
         Vector3 g_LightDir;						// direccion de la luz actual
         Matrix g_LightView;						// matriz de view del light
         float alfa_sol;             // pos. del sol
-        TgcBox sol;
+        //TgcBox sol;
         bool cerca;
 
        //inicio
@@ -108,7 +108,7 @@ namespace AlumnoEjemplos.Quicksort
             //La responsabilidad cae toda de nuestro lado
             GuiController.Instance.CustomRenderEnabled = true;
             g_pCubeMapAgua = TextureLoader.FromCubeFile(d3dDevice, GuiController.Instance.ExamplesMediaDir + "Shaders\\CubeMap.dds");
-            sol = TgcBox.fromSize(new Vector3(50, 50, 50), Color.LightYellow);
+            //sol = TgcBox.fromSize(new Vector3(50, 50, 50), Color.LightYellow);
 
             
 
@@ -234,9 +234,11 @@ namespace AlumnoEjemplos.Quicksort
             TgcScene scene2 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\Boteconcañon\\BoteConCanion-TgcScene.xml");
             mainMesh = scene2.Meshes[0];
             mainMesh.Position = new Vector3(400f,0f, 400f);
+            mainMesh.Scale = new Vector3(2f,2f,2f);
             TgcScene scene4 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\Boteconcañon\\BoteConCanion-TgcScene.xml");
             meshBot = scene4.Meshes[0];
             meshBot.Position = new Vector3(-400f,0f,400f);
+            meshBot.Scale = new Vector3(1.8f, 1.8f, 1.8f);
 
             //TgcScene scene3 = loader.loadSceneFromFile(GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Media\\Piso\\Agua-TgcScene.xml");
             //agua = scene3.Meshes[0];
@@ -275,7 +277,7 @@ namespace AlumnoEjemplos.Quicksort
 
 
             //GuiController.Instance.Modifiers.addFloat("reflection", 0, 1, 0.35f);
-            GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-3000, 0, -3000), new Vector3(3000, 3000, 3000), new Vector3(0, 900, -2400));
+            GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-3000, 0, -3000), new Vector3(3000, 3000, 3000), new Vector3(0, 1950, -2400));
             GuiController.Instance.Modifiers.addColor("lightColor", Color.LightYellow);
             //GuiController.Instance.Modifiers.addFloat("bumpiness", 0, 1, 1f);
             GuiController.Instance.Modifiers.addFloat("lightIntensity", 0, 500, 150);
@@ -453,7 +455,7 @@ namespace AlumnoEjemplos.Quicksort
 
             //Actualzar posición de la luz
             Vector3 lightPos = (Vector3)GuiController.Instance.Modifiers["lightPos"];
-            sol.Position = lightPos;
+            //sol.Position = lightPos;
             Vector3 eyePosition = GuiController.Instance.ThirdPersonCamera.getPosition();
 
             if (g_pCubeMapAgua != null)
@@ -576,7 +578,7 @@ namespace AlumnoEjemplos.Quicksort
 
             
            
-            sol.render();
+            //sol.render();
             skyBox.render();
 
 
@@ -599,6 +601,7 @@ namespace AlumnoEjemplos.Quicksort
             if (activar_efecto)
             {
                 effectlluvia.Technique = "AlarmaTechnique";
+                //sol.Position = new Vector3(0f, 1950f, 3000f);
             }
             else
             {
