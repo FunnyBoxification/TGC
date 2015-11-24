@@ -25,8 +25,8 @@ namespace AlumnoEjemplos.Quicksort
     public class EjemploAlumno : TgcExample
     {
 
-        const float VELOCIDAD_MOVIMIENTO = 125f;
-        const float VELOCIDAD_ROTACION = 20f;
+        const float VELOCIDAD_MOVIMIENTO = 140f;
+        const float VELOCIDAD_ROTACION = 25f;
         const float ACELERACION = 2f;
 
         bool pausaActiva = false;
@@ -243,32 +243,31 @@ namespace AlumnoEjemplos.Quicksort
             meshBot.Position = new Vector3(-200f,0f,200f);
             meshBot.Scale = new Vector3(1.8f, 1.8f, 1.8f);
 
-            barcoPrincipal = new BarcoPlayer(100, 50, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh, 0.05, loader);
+            barcoPrincipal = new BarcoPlayer(150, 50, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh, 0.06, loader);
 
             //pongo enemigos
-            int rows = 3;
-            int cols = 3;
-            float offset = 1500;
+            int rows = 10;
+            
+            float offset = 5000;
             
             for (int i = 0; i < rows; i++)
             {
-                for (int j = 0; j < cols; j++)
-                {
+                
                     //Crear instancia de modelo
-                    TgcMesh instance = meshBot.createMeshInstance(meshBot.Name + i + "_" + j);
+                    TgcMesh instance = meshBot.createMeshInstance(meshBot.Name + i + "_" );
                     Random rnd1 = new Random();
                     //Desplazarlo
-                    instance.move(i  * offset, 70, j  * offset);
+                    instance.move(offset * (FastMath.Cos((float)i * 0.523599f)),0,offset * FastMath.Sin((float)i * 0.523599f));
                     instance.Scale = new Vector3(1.5f, 1.5f, 1.5f);
 
                     
-                    var barcoenem = new BarcoBot(100, 15, 100, ACELERACION, 18, instance, 0.05, barcoPrincipal, loader);
+                    var barcoenem = new BarcoBot(100, 10, 100, ACELERACION, 18, instance, 0.05, barcoPrincipal, loader);
                     
 
                     barcoenem.Mesh.Effect = GuiController.Instance.Shaders.TgcMeshPointLightShader; //efectosAguaIluminacion;
                     barcoenem.Mesh.Technique = GuiController.Instance.Shaders.getTgcMeshTechnique(barcoenem.Mesh.RenderType);//"EnvironmentMapTechnique";
                     enemigos.Add(barcoenem);
-                }
+                
             }
             //TgcScene scene3 = loader.loadSceneFromFile(GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Media\\Piso\\Agua-TgcScene.xml");
             //agua = scene3.Meshes[0];
