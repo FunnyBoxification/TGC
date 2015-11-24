@@ -37,6 +37,7 @@ namespace AlumnoEjemplos.Quicksort
         BarcoPlayer barcoPrincipal;
        
         BarcoBot barcoEnemigo;
+        List<BarcoBot> enemigos = new List<BarcoBot>();
 
         CubeTexture g_pCubeMapAgua = null;
 
@@ -237,9 +238,36 @@ namespace AlumnoEjemplos.Quicksort
             mainMesh.Scale = new Vector3(2f,2f,2f);
             TgcScene scene4 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\Boteconcañon\\BoteConCanion-TgcScene.xml");
             meshBot = scene4.Meshes[0];
-            meshBot.Position = new Vector3(-400f,0f,400f);
+            meshBot.Position = new Vector3(-200f,0f,200f);
             meshBot.Scale = new Vector3(1.8f, 1.8f, 1.8f);
 
+            barcoPrincipal = new BarcoPlayer(100, 50, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh, 0.05, loader);
+
+            //pongo enemigos
+            int rows = 3;
+            int cols = 3;
+            float offset = 1500;
+            
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    //Crear instancia de modelo
+                    TgcMesh instance = meshBot.createMeshInstance(meshBot.Name + i + "_" + j);
+                    Random rnd1 = new Random();
+                    //Desplazarlo
+                    instance.move(i  * offset, 70, j  * offset);
+                    instance.Scale = new Vector3(1.5f, 1.5f, 1.5f);
+
+                    
+                    var barcoenem = new BarcoBot(100, 15, 100, ACELERACION, 18, instance, 0.05, barcoPrincipal, loader);
+                    
+
+                    barcoenem.Mesh.Effect = GuiController.Instance.Shaders.TgcMeshPointLightShader; //efectosAguaIluminacion;
+                    barcoenem.Mesh.Technique = GuiController.Instance.Shaders.getTgcMeshTechnique(barcoenem.Mesh.RenderType);//"EnvironmentMapTechnique";
+                    enemigos.Add(barcoenem);
+                }
+            }
             //TgcScene scene3 = loader.loadSceneFromFile(GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Media\\Piso\\Agua-TgcScene.xml");
             //agua = scene3.Meshes[0];
             //agua.Scale = new Vector3(25f, 1f, 25f);
@@ -251,16 +279,16 @@ namespace AlumnoEjemplos.Quicksort
 
             
 
-            barcoPrincipal = new BarcoPlayer(100, 50, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh,0.05,loader);
-            barcoEnemigo = new BarcoBot(100, 35,100, ACELERACION, 18, meshBot, 0.05,barcoPrincipal,loader);
-            barcoPrincipal.BarcoEnemigo = barcoEnemigo;
+           
+            //barcoEnemigo = new BarcoBot(100, 35,100, ACELERACION, 18, meshBot, 0.05,barcoPrincipal,loader);
+            barcoPrincipal.BarcosEnemigos = enemigos;
 
             // iluminacion en los barcos
             barcoPrincipal.Mesh.Effect =GuiController.Instance.Shaders.TgcMeshPointLightShader;// efectosAguaIluminacion;
             barcoPrincipal.Mesh.Technique = GuiController.Instance.Shaders.getTgcMeshTechnique(barcoPrincipal.Mesh.RenderType); //"EnvironmentMapTechnique";
 
-            barcoEnemigo.Mesh.Effect = GuiController.Instance.Shaders.TgcMeshPointLightShader; //efectosAguaIluminacion;
-            barcoEnemigo.Mesh.Technique = GuiController.Instance.Shaders.getTgcMeshTechnique(barcoEnemigo.Mesh.RenderType);//"EnvironmentMapTechnique";
+            //barcoEnemigo.Mesh.Effect = GuiController.Instance.Shaders.TgcMeshPointLightShader; //efectosAguaIluminacion;
+            //barcoEnemigo.Mesh.Technique = GuiController.Instance.Shaders.getTgcMeshTechnique(barcoEnemigo.Mesh.RenderType);//"EnvironmentMapTechnique";
 
             //Camara en tercera persona focuseada en el barco (canoa) 
 
@@ -417,13 +445,7 @@ namespace AlumnoEjemplos.Quicksort
             }
         }
 
-        private void checkearVidas(Barco barco)
-        {
-            if (barco.Vida <= 0)
-            {
-                barco.Mesh.setColor(Color.Red);
-            }
-        }
+       
 
         private void drawSceneToRenderTarget(Microsoft.DirectX.Direct3D.Device d3dDevice, float elapsedTime)
         {
@@ -499,7 +521,10 @@ namespace AlumnoEjemplos.Quicksort
             //Dibujar objeto principal
             //Siempre primero hacer todos los cálculos de lógica e input y luego al final dibujar todo (ciclo update-render)
             barcoPrincipal.colocarAltura(time);
-            barcoEnemigo.colocarAltura(time);
+            foreach (BarcoBot barcoEnem in enemigos)
+            {
+                barcoEnem.colocarAltura(time);
+            }
             if (barcoPrincipal.Vida > 0)
             {
                 barcoPrincipal.Movimiento(elapsedTime);
@@ -508,16 +533,19 @@ namespace AlumnoEjemplos.Quicksort
             {
                 barcoPrincipal.hundir(elapsedTime);
             }
-             if (barcoEnemigo.Vida > 0){
-            barcoEnemigo.Movimiento(elapsedTime);
-             }
-             else
-             {
-                 barcoEnemigo.hundir(elapsedTime);
-             }
+            foreach (BarcoBot barcoenem in enemigos)
+            {
+                if (barcoenem.Vida > 0)
+                {
+                    barcoenem.Movimiento(elapsedTime);
+                }
+                else
+                {
+                    barcoenem.hundir(elapsedTime);
+                }
+            }
 
-             checkearVidas(barcoEnemigo);
-             checkearVidas(barcoPrincipal);
+             
             barcoPrincipal.Mesh.Effect.SetValue("lightColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["lightColor"]));
             barcoPrincipal.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
             barcoPrincipal.Mesh.Effect.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(eyePosition));
@@ -535,26 +563,30 @@ namespace AlumnoEjemplos.Quicksort
             barcoPrincipal.Mesh.Effect.SetValue("materialSpecularExp", (float)GuiController.Instance.Modifiers["specularEx"]);
             barcoPrincipal.Mesh.render();
 
-            barcoEnemigo.Mesh.Effect.SetValue("lightColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["lightColor"]));
-            barcoEnemigo.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
-            //barcoEnemigo.Mesh.Effect.SetValue("bumpiness", (float)GuiController.Instance.Modifiers["bumpiness"]);
-            barcoEnemigo.Mesh.Effect.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(eyePosition));
-            barcoEnemigo.Mesh.Effect.SetValue("lightIntensity", (float)GuiController.Instance.Modifiers["lightIntensity"]);
-            barcoEnemigo.Mesh.Effect.SetValue("lightAttenuation", (float)GuiController.Instance.Modifiers["lightAttenuation"]);
-            //barcoEnemigo.Mesh.Effect.SetValue("reflection", (float)GuiController.Instance.Modifiers["reflection"]);
-            barcoEnemigo.Mesh.Effect.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(GuiController.Instance.ThirdPersonCamera.getPosition()));
-            barcoEnemigo.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
+            foreach (BarcoBot barcoEnem in enemigos)
+            {
+                barcoEnem.Mesh.Effect.SetValue("lightColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["lightColor"]));
+                barcoEnem.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
 
-            barcoEnemigo.Mesh.Effect.SetValue("materialEmissiveColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mEmissive"]));
-            barcoEnemigo.Mesh.Effect.SetValue("materialAmbientColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mAmbient"]));
-            barcoEnemigo.Mesh.Effect.SetValue("materialDiffuseColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mDiffuse"]));
-            barcoEnemigo.Mesh.Effect.SetValue("materialSpecularColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mSpecular"]));
-            barcoEnemigo.Mesh.Effect.SetValue("materialSpecularExp", (float)GuiController.Instance.Modifiers["specularEx"]);
+                barcoEnem.Mesh.Effect.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(eyePosition));
+                barcoEnem.Mesh.Effect.SetValue("lightIntensity", (float)GuiController.Instance.Modifiers["lightIntensity"]);
+                barcoEnem.Mesh.Effect.SetValue("lightAttenuation", (float)GuiController.Instance.Modifiers["lightAttenuation"]);
 
-            barcoEnemigo.Mesh.render();
+                barcoEnem.Mesh.Effect.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(GuiController.Instance.ThirdPersonCamera.getPosition()));
+                barcoEnem.Mesh.Effect.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
 
+                barcoEnem.Mesh.Effect.SetValue("materialEmissiveColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mEmissive"]));
+                barcoEnem.Mesh.Effect.SetValue("materialAmbientColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mAmbient"]));
+                barcoEnem.Mesh.Effect.SetValue("materialDiffuseColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mDiffuse"]));
+                barcoEnem.Mesh.Effect.SetValue("materialSpecularColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mSpecular"]));
+                barcoEnem.Mesh.Effect.SetValue("materialSpecularExp", (float)GuiController.Instance.Modifiers["specularEx"]);
+
+                barcoEnem.Mesh.render();
+                barcoEnem.volverAltura(time);
+
+            }
             barcoPrincipal.volverAltura(time);
-            barcoEnemigo.volverAltura(time);
+            
 
             foreach (var bala in barcoPrincipal.balas)
             {
@@ -566,13 +598,15 @@ namespace AlumnoEjemplos.Quicksort
                 }
             }
 
-
-            foreach (var bala in barcoEnemigo.balas)
+            foreach (BarcoBot barco in enemigos)
             {
-                if (bala.Mesh.Position.Y > 0)
+                foreach (var bala in barco.balas)
                 {
-                    bala.Mover(elapsedTime);
-                    bala.Mesh.render();
+                    if (bala.Mesh.Position.Y > 0)
+                    {
+                        bala.Mover(elapsedTime);
+                        bala.Mesh.render();
+                    }
                 }
             }
 
@@ -633,7 +667,9 @@ namespace AlumnoEjemplos.Quicksort
         {
             //escena.disposeAll();
             mainMesh.dispose();
-            meshBot.dispose();
+            
+              meshBot.dispose();
+            
         }
 
        

@@ -18,6 +18,7 @@ namespace AlumnoEjemplos.Quicksort
     class BarcoBot : Barco
     {
         float cooldown = 0;
+         Barco BarcoEnemigo { get; set; }
         
         public Vector3 LastPos { get; set; }
 
@@ -25,6 +26,7 @@ namespace AlumnoEjemplos.Quicksort
         {
             BarcoEnemigo = barcoEnemigo;
             LastPos = Mesh.Position;
+            BarcosEnemigos.Add(barcoEnemigo);
 
         }
 

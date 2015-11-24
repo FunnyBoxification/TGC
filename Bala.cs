@@ -23,12 +23,12 @@ namespace AlumnoEjemplos.Quicksort
         public bool activa { get; set; }
         public bool subiendo { get; set; }
         public int tipoBala { get; set; }
-        public Bala(TgcMesh mesh, int dam,Barco barcoEnem, int tipo)
+        public Bala(TgcMesh mesh, int dam,List<Barco> barcosEnem, int tipo)
         {
 
             Mesh = mesh;
             danio = dam;
-            BarcoEnemigo = barcoEnem;
+            BarcosEnemigos = barcosEnem;
             alturaMax = 35;
             activa = true;
             subiendo = true;
@@ -38,20 +38,23 @@ namespace AlumnoEjemplos.Quicksort
         public TgcMesh Mesh { get; set; }
         public float altura { get; set; }
         public float direccion { get; set; }
-        public Barco BarcoEnemigo { get; set; }
+        public List<Barco> BarcosEnemigos { get; set; }
         
 
         public void Mover(float elapsedTime)
         {
 
-            TgcCollisionUtils.BoxBoxResult result = TgcCollisionUtils.classifyBoxBox(Mesh.BoundingBox, BarcoEnemigo.Mesh.BoundingBox);
-            if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
+            foreach (Barco barco in BarcosEnemigos)
             {
-                if (col == false)
+                TgcCollisionUtils.BoxBoxResult result = TgcCollisionUtils.classifyBoxBox(Mesh.BoundingBox, barco.Mesh.BoundingBox);
+                if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
                 {
-                    BarcoEnemigo.Vida = BarcoEnemigo.Vida - danio;
-                    col = true;
-                  
+                    if (col == false)
+                    {
+                        barco.Vida = barco.Vida - danio;
+                        col = true;
+
+                    }
                 }
             }
             //foreach (TgcMesh mesh in EjemploAlumno.getEscenaMeshes())

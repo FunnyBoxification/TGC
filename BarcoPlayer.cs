@@ -17,7 +17,7 @@ namespace AlumnoEjemplos.Quicksort
 {
     class BarcoPlayer : Barco {
         float cooldown = 0;
-        
+        public List<BarcoBot> BarcosEnemigos { get; set; }
 
         public BarcoPlayer(int vida, int danio, float velocidad,float aceleracion, float rotacion, TgcMesh mesh, double pot, TgcSceneLoader bm) : base (vida, danio, velocidad, rotacion, mesh,pot,bm)
         {
@@ -93,7 +93,7 @@ namespace AlumnoEjemplos.Quicksort
                 //Rotar personaje y la camara, hay que multiplicarlo por el tiempo transcurrido para no atarse a la velocidad el hardware
                 float rotAngle = Geometry.DegreeToRadian((float)VelocidadRot * elapsedTime);
                 this.Mesh.rotateY(rotAngle);
-                //GuiController.Instance.ThirdPersonCamera.rotateY(rotAngle);
+                GuiController.Instance.ThirdPersonCamera.rotateY(rotAngle);
             }
 
             //Si hubo desplazamiento
@@ -109,15 +109,19 @@ namespace AlumnoEjemplos.Quicksort
                 this.Mesh.moveOrientedY((float)VelocidadMov* boostOla() * elapsedTime);
                 
                 bool collide = false;
-      
-                    TgcCollisionUtils.BoxBoxResult result = TgcCollisionUtils.classifyBoxBox(this.Mesh.BoundingBox, BarcoEnemigo.Mesh.BoundingBox);
+                foreach (BarcoBot barco in BarcosEnemigos)
+                {
+                    TgcCollisionUtils.BoxBoxResult result = TgcCollisionUtils.classifyBoxBox(this.Mesh.BoundingBox, barco.Mesh.BoundingBox);
                     if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
                     {
                         collide = true;
                         Vida = 0;
-                        BarcoEnemigo.Vida = 0;
-                        
+                        barco.Vida = 0;
+
                     }
+                }
+
+
                     /*foreach(TgcMesh mesh in EjemploAlumno.getEscenaMeshes() ) {
 
                     result = TgcCollisionUtils.classifyBoxBox(this.Mesh.BoundingBox, mesh.BoundingBox);

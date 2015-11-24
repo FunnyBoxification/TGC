@@ -30,7 +30,7 @@ namespace AlumnoEjemplos.Quicksort
         public double VelocidadRot { get; set; }
         public TgcSceneLoader Loader{get;set;}
         public List<Bala> balas{get;set;}
-        public Barco BarcoEnemigo { get; set; }
+        public List<Barco> BarcosEnemigos { get; set; }
         public Vector3 PosAntes { get; set; }
 
         public Barco(int vida, int danio, double velocidad, double rotacion, TgcMesh mesh,double potencia, TgcSceneLoader ldr)
@@ -46,6 +46,7 @@ namespace AlumnoEjemplos.Quicksort
             Loader = ldr;
             PosAntes = new Vector3(0f,0f,0f);
             balas = new List<Bala>();
+            BarcosEnemigos = new List<Barco>();
         }
 
         public void dispararBala(int tipobala, int direccion)
@@ -81,8 +82,20 @@ namespace AlumnoEjemplos.Quicksort
                 balaMesh.rotateY(Geometry.DegreeToRadian(90));
             }
 
-            var bala = new Bala(balaMesh, Danio,BarcoEnemigo, tipobala);
-            balas.Add(bala);
+            var enemigos = new List<Barco>();
+            if (tipobala == 1)
+            {
+                
+                var bala = new Bala(balaMesh, Danio, BarcosEnemigos, tipobala);
+                balas.Add(bala);
+            }
+            else
+            {
+                
+                var bala = new Bala(balaMesh, Danio, BarcosEnemigos, tipobala);
+                balas.Add(bala);
+            }
+            
         }
 
         public void rotar(int p)
