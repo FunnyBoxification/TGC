@@ -26,7 +26,7 @@ namespace AlumnoEjemplos.Quicksort
     {
 
         const float VELOCIDAD_MOVIMIENTO = 140f;
-        const float VELOCIDAD_ROTACION = 25f;
+        const float VELOCIDAD_ROTACION = 20f;
         const float ACELERACION = 2f;
 
         bool pausaActiva = false;
@@ -42,7 +42,7 @@ namespace AlumnoEjemplos.Quicksort
         CubeTexture g_pCubeMapAgua = null;
 
         static TgcScene escena;
-        TgcMesh mainMesh, agua, meshBot; 
+        TgcMesh mainMesh, agua, meshBot,balaMesh1,balaMesh2; 
         TgcSkyBox skyBox;
 
         float near_plane = 1f;
@@ -240,8 +240,14 @@ namespace AlumnoEjemplos.Quicksort
             meshBot = scene4.Meshes[0];
             meshBot.Position = new Vector3(-200f,0f,200f);
             meshBot.Scale = new Vector3(1.8f, 1.8f, 1.8f);
+            TgcScene scene3 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\Hacha\\Bala-TgcScene.xml");
+            balaMesh1 = scene3.Meshes[0];
+            
 
-            barcoPrincipal = new BarcoPlayer(150, 50, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh, 0.06, loader);
+            TgcScene scene5 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\Hacha\\Hacha-TgcScene.xml");
+             balaMesh2 = scene5.Meshes[0];
+
+            barcoPrincipal = new BarcoPlayer(150, 50, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh, 0.06, loader,balaMesh2);
 
             //pongo enemigos
             int rows = 10;
@@ -259,7 +265,7 @@ namespace AlumnoEjemplos.Quicksort
                     instance.Scale = new Vector3(1.5f, 1.5f, 1.5f);
 
                     
-                    var barcoenem = new BarcoBot(100, 10, 100, ACELERACION, 18, instance, 0.05, barcoPrincipal, loader);
+                    var barcoenem = new BarcoBot(100, 10, 100, ACELERACION, 18, instance, 0.05, barcoPrincipal, loader,balaMesh1);
                     
 
                     barcoenem.Mesh.Effect = GuiController.Instance.Shaders.TgcMeshPointLightShader; //efectosAguaIluminacion;
@@ -666,8 +672,9 @@ namespace AlumnoEjemplos.Quicksort
         {
             //escena.disposeAll();
             mainMesh.dispose();
-            
-              meshBot.dispose();
+            meshBot.dispose();
+            balaMesh1.dispose();
+            balaMesh2.dispose();
             
         }
 

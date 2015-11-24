@@ -70,8 +70,13 @@ namespace AlumnoEjemplos.Quicksort
             if (tipoBala == 0)
             {
                 this.Mesh.rotateX((float)10 * elapsedTime);
+                this.Mesh.moveOrientedY((float)200 * elapsedTime);
             }
-            this.Mesh.moveOrientedY((float) 120 *elapsedTime);
+            else
+            {
+                this.Mesh.moveOrientedY((float)150 * elapsedTime);
+            }
+            
             if (subiendo)
             {
                 this.Mesh.move(new Vector3(0, elapsedTime * 12.5f, 0));

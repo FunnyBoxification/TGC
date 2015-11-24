@@ -22,7 +22,7 @@ namespace AlumnoEjemplos.Quicksort
         
         public Vector3 LastPos { get; set; }
 
-        public BarcoBot(int vida, int danio, float velocidad,float aceleracion, float rotacion, TgcMesh mesh, double pot, Barco barcoEnemigo,TgcSceneLoader bm) : base (vida, danio, velocidad, rotacion, mesh,pot,bm)
+        public BarcoBot(int vida, int danio, float velocidad,float aceleracion, float rotacion, TgcMesh mesh, double pot, Barco barcoEnemigo,TgcSceneLoader bm,TgcMesh bala) : base (vida, danio, velocidad, rotacion, mesh,pot,bm,bala)
         {
             BarcoEnemigo = barcoEnemigo;
             LastPos = Mesh.Position;

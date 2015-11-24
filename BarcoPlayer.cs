@@ -19,7 +19,7 @@ namespace AlumnoEjemplos.Quicksort
         float cooldown = 0;
         public List<BarcoBot> BarcosEnemigos { get; set; }
 
-        public BarcoPlayer(int vida, int danio, float velocidad,float aceleracion, float rotacion, TgcMesh mesh, double pot, TgcSceneLoader bm) : base (vida, danio, velocidad, rotacion, mesh,pot,bm)
+        public BarcoPlayer(int vida, int danio, float velocidad,float aceleracion, float rotacion, TgcMesh mesh, double pot, TgcSceneLoader bm,TgcMesh bala) : base (vida, danio, velocidad, rotacion, mesh,pot,bm,bala)
         {
             
         }
@@ -79,7 +79,7 @@ namespace AlumnoEjemplos.Quicksort
             else if (d3dInput.keyDown(Key.Q) && cooldown <= 0)
             {
                 this.dispararBala(0,0);
-                cooldown = 2.5f;
+                cooldown = 0.5f;
 
 
             }else
@@ -115,7 +115,7 @@ namespace AlumnoEjemplos.Quicksort
                     if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
                     {
                         collide = true;
-                        Vida = 0;
+                        Vida -= 50;
                         barco.Vida = 0;
 
                     }

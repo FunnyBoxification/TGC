@@ -32,8 +32,9 @@ namespace AlumnoEjemplos.Quicksort
         public List<Bala> balas{get;set;}
         public List<Barco> BarcosEnemigos { get; set; }
         public Vector3 PosAntes { get; set; }
+        public TgcMesh balamesh { get; set; }
 
-        public Barco(int vida, int danio, double velocidad, double rotacion, TgcMesh mesh,double potencia, TgcSceneLoader ldr)
+        public Barco(int vida, int danio, double velocidad, double rotacion, TgcMesh mesh,double potencia, TgcSceneLoader ldr, TgcMesh bala)
         {
             Vida = vida;
             Danio = danio;
@@ -47,52 +48,52 @@ namespace AlumnoEjemplos.Quicksort
             PosAntes = new Vector3(0f,0f,0f);
             balas = new List<Bala>();
             BarcosEnemigos = new List<Barco>();
+            balamesh = bala;
         }
 
         public void dispararBala(int tipobala, int direccion)
         {
             TgcMesh balaMesh;
+            TgcMesh instance = balamesh.createMeshInstance(balamesh.Name + "_");
             if (tipobala == 1)
             {
-                TgcScene scene2 = Loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Armas\\Hacha\\Bala-TgcScene.xml");
-                balaMesh = scene2.Meshes[0];
-                balaMesh.Scale = new Vector3(3f, 3f, 3f);
+                
+                instance.Scale = new Vector3(3f, 3f, 3f);
 
             }
             else
             {
-                TgcScene scene2 = Loader.loadSceneFromFile(GuiController.Instance.ExamplesMediaDir + "MeshCreator\\Meshes\\Armas\\Hacha\\Hacha-TgcScene.xml");
-                balaMesh = scene2.Meshes[0];
-                balaMesh.Scale = new Vector3(2f, 2f, 2f);
+                
+                instance.Scale = new Vector3(2f, 2f, 2f);
             }
             
             var pos = this.Mesh.Position;
             var rot = this.Mesh.Rotation;
             Vector3 a = new Vector3(0,10,0);
-            balaMesh.Position = this.Mesh.Position +a ;
+            instance.Position = this.Mesh.Position +a ;
             
-            balaMesh.Rotation = this.Mesh.Rotation;
+            instance.Rotation = this.Mesh.Rotation;
             //dispara a 90 grados
             if (direccion == 0)
             {
-                balaMesh.rotateY(Geometry.DegreeToRadian(270));
+                instance.rotateY(Geometry.DegreeToRadian(270));
             }
             else
             {
-                balaMesh.rotateY(Geometry.DegreeToRadian(90));
+                instance.rotateY(Geometry.DegreeToRadian(90));
             }
 
             var enemigos = new List<Barco>();
             if (tipobala == 1)
             {
                 
-                var bala = new Bala(balaMesh, Danio, BarcosEnemigos, tipobala);
+                var bala = new Bala(instance, Danio, BarcosEnemigos, tipobala);
                 balas.Add(bala);
             }
             else
             {
                 
-                var bala = new Bala(balaMesh, Danio, BarcosEnemigos, tipobala);
+                var bala = new Bala(instance, Danio, BarcosEnemigos, tipobala);
                 balas.Add(bala);
             }
             
