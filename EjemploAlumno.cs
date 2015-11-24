@@ -100,6 +100,8 @@ namespace AlumnoEjemplos.Quicksort
 
         public override void init()
         {
+            pausaActiva = false;
+            comenzoJuego = false;
             //GuiController.Instance: acceso principal a todas las herramientas del Framework
 
             //Device de DirectX para crear primitivas
@@ -310,10 +312,10 @@ namespace AlumnoEjemplos.Quicksort
 
 
             //GuiController.Instance.Modifiers.addFloat("reflection", 0, 1, 0.35f);
-            GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-3000, 0, -3000), new Vector3(3000, 3000, 3000), new Vector3(0, 1950, -2400));
+            GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-3000, 0, -3000), new Vector3(3000, 3000, 3000), new Vector3(-300, 1500, 3000));
             GuiController.Instance.Modifiers.addColor("lightColor", Color.LightYellow);
             //GuiController.Instance.Modifiers.addFloat("bumpiness", 0, 1, 1f);
-            GuiController.Instance.Modifiers.addFloat("lightIntensity", 0, 500, 150);
+            GuiController.Instance.Modifiers.addFloat("lightIntensity", 0, 500, 325);
             GuiController.Instance.Modifiers.addFloat("lightAttenuation", 0.1f, 2, 0.1f);
             GuiController.Instance.Modifiers.addFloat("specularEx", 0, 100, 20f);
             
@@ -357,7 +359,7 @@ namespace AlumnoEjemplos.Quicksort
                 //Finalizar el dibujado de Sprites
                 GuiController.Instance.Drawer2D.endDrawSprite();
 
-                if (d3dInput.keyDown(Key.Space))
+                if (d3dInput.keyPressed(Key.Space))
                 {
                     if(!comenzoJuego)
                     {
@@ -365,7 +367,7 @@ namespace AlumnoEjemplos.Quicksort
                     }
                 }
 
-                if (d3dInput.keyDown(Key.P))
+                if (d3dInput.keyPressed(Key.P))
                 {
                         pausaActiva = false;
                  }
