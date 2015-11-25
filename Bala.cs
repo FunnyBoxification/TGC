@@ -47,7 +47,7 @@ namespace AlumnoEjemplos.Quicksort
 
             foreach (Barco barco in BarcosEnemigos)
             {
-                if (col == false)
+                if (!col)
                 {
                     TgcCollisionUtils.BoxBoxResult result = TgcCollisionUtils.classifyBoxBox(Mesh.BoundingBox, barco.Mesh.BoundingBox);
                     if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
