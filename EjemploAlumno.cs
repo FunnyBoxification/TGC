@@ -195,7 +195,7 @@ namespace AlumnoEjemplos.Quicksort
             spriteMinimapa.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\minimapa.png");
             Size minimapSize = spriteMinimapa.Texture.Size;
             spriteMinimapa.Scaling = new Vector2(0.5f, 0.5f);
-            spriteMinimapa.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - minimapSize.Width / 2, 0), FastMath.Max(screenSize.Height / 2 - minimapSize.Height / 2, 0));
+            spriteMinimapa.Position = new Vector2(FastMath.Max(screenSize.Width  - minimapSize.Width/2, 0), FastMath.Max(screenSize.Height  - minimapSize.Height , 0));
            
 
             //inicio//
