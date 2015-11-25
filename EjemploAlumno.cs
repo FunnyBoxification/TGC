@@ -37,7 +37,7 @@ namespace AlumnoEjemplos.Quicksort
         BarcoPlayer barcoPrincipal;
        
         BarcoBot barcoEnemigo;
-        List<BarcoBot> enemigos = new List<BarcoBot>();
+        List<Barco> enemigos = new List<Barco>();
 
         CubeTexture g_pCubeMapAgua = null;
 
@@ -197,11 +197,13 @@ namespace AlumnoEjemplos.Quicksort
             spriteMinimapa.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\minimapa.png");
             Size minimapSize = spriteMinimapa.Texture.Size;
             spriteMinimapa.Scaling = new Vector2(0.5f, 0.5f);
+
             spriteMinimapa.Position = new Vector2(FastMath.Max(screenSize.Width  - minimapSize.Width/2, 0), FastMath.Max(screenSize.Height  - minimapSize.Height , 0));
 
             spriteBarcoPrincipal = new TgcSprite();
             spriteBarcoPrincipal.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\pelota-azul.png");
             spriteBarcoPrincipal.Scaling = new Vector2(0.025f,0.025f);
+
 
             //inicio//
 
@@ -293,7 +295,7 @@ namespace AlumnoEjemplos.Quicksort
                 
                     //Crear instancia de modelo
                     TgcMesh instance = meshBot.createMeshInstance(meshBot.Name + i + "_" );
-                    Random rnd1 = new Random();
+                    
                     //Desplazarlo
                     instance.move(offset * (FastMath.Cos((float)i * 0.523599f)),0,offset * FastMath.Sin((float)i * 0.523599f));
                     instance.Scale = new Vector3(1.5f, 1.5f, 1.5f);
@@ -419,7 +421,7 @@ namespace AlumnoEjemplos.Quicksort
                         GuiController.Instance.FpsCamera.JumpSpeed = 0f;
                         GuiController.Instance.FpsCamera.setCamera(new Vector3(0f, 700f, -2300f), new Vector3(900f, 100f, -300f));
                     }
-                    else if (cerca == true)
+                    else if (cerca)
                     {
                         GuiController.Instance.ThirdPersonCamera.Enable = true;
 
@@ -510,7 +512,7 @@ namespace AlumnoEjemplos.Quicksort
 
             if (barcoPrincipal.Vida > 0)
             {
-                sprVidaLLena.Scaling = new Vector2(barcoPrincipal.Vida/150, 1);
+                sprVidaLLena.Scaling = new Vector2(barcoPrincipal.Vida/150f, 1);
                 sprVidaLLena.render();
             }
             Size screenSize = GuiController.Instance.Panel3d.Size;
@@ -671,7 +673,7 @@ namespace AlumnoEjemplos.Quicksort
                 {
                     if (bala.Mesh.Position.Y > 0)
                     {
-                        if (bala.col)
+                        if (!bala.col)
                         {
                             bala.Mover(elapsedTime);
                             bala.Mesh.render();
