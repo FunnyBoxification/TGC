@@ -68,6 +68,9 @@ namespace AlumnoEjemplos.Quicksort
         TgcSprite spriteFondo;
         TgcSprite spriteLetras;
         TgcSprite spriteInicio;
+
+        //Minimapa
+        TgcSprite spriteMinimapa;
         
         //inicio
         //lluvia
@@ -185,6 +188,12 @@ namespace AlumnoEjemplos.Quicksort
 
             spriteInicio.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize3.Width / 2, 0), FastMath.Max(screenSize.Height / 2 - textureSize3.Height / 2, 0));
             spriteInicio.Position = new Vector2(spriteInicio.Position.X + 210, spriteLetras.Position.Y+95);
+
+            spriteMinimapa = new TgcSprite();
+            spriteMinimapa.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\minimapa.png");
+            Size minimapSize = spriteMinimapa.Texture.Size;
+            spriteMinimapa.Scaling = new Vector2(0.5f, 0.5f);
+            spriteMinimapa.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - minimapSize.Width / 2, 0), FastMath.Max(screenSize.Height / 2 - minimapSize.Height / 2, 0));
            
 
             //inicio//
@@ -312,7 +321,7 @@ namespace AlumnoEjemplos.Quicksort
 
 
             //GuiController.Instance.Modifiers.addFloat("reflection", 0, 1, 0.35f);
-            GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-3000, 0, -3000), new Vector3(3000, 3000, 3000), new Vector3(-300, 1500, 3000));
+            //GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-3000, 0, -3000), new Vector3(3000, 3000, 3000), new Vector3(-300, 1500, 3000));
             GuiController.Instance.Modifiers.addColor("lightColor", Color.LightYellow);
             //GuiController.Instance.Modifiers.addFloat("bumpiness", 0, 1, 1f);
             GuiController.Instance.Modifiers.addFloat("lightIntensity", 0, 500, 325);
@@ -374,6 +383,7 @@ namespace AlumnoEjemplos.Quicksort
             }
             else
             {
+
                 if (d3dInput.keyPressed(Key.C))
                 {
                     if (GuiController.Instance.ThirdPersonCamera.Enable && cerca == true)
@@ -410,7 +420,10 @@ namespace AlumnoEjemplos.Quicksort
                 {
                      pausaActiva = true;
                 }
-
+                if (d3dInput.keyPressed(Key.DownArrow))
+                {
+                    
+                }
                 if (d3dInput.keyPressed(Key.L))
                 {
                     if (activar_efecto)
@@ -462,6 +475,7 @@ namespace AlumnoEjemplos.Quicksort
 
             //Como estamos en modo CustomRenderEnabled, tenemos que dibujar todo nosotros, incluso el contador de FPS
             GuiController.Instance.Text3d.drawText("FPS: " + HighResolutionTimer.Instance.FramesPerSecond, 0, 0, Color.Yellow);
+            spriteMinimapa.render();
 
             //Tambien hay que dibujar el indicador de los ejes cartesianos
             GuiController.Instance.AxisLines.render();
@@ -483,7 +497,7 @@ namespace AlumnoEjemplos.Quicksort
             g_LightDir.Normalize();
 
             //Actualzar posición de la luz
-            Vector3 lightPos = (Vector3)GuiController.Instance.Modifiers["lightPos"];
+            Vector3 lightPos = new Vector3(-300, 1500, 3000);
             //sol.Position = lightPos;
             Vector3 eyePosition = GuiController.Instance.ThirdPersonCamera.getPosition();
 
@@ -622,8 +636,6 @@ namespace AlumnoEjemplos.Quicksort
             //sol.render();
             skyBox.render();
 
-
-
             //Terminamos manualmente el renderizado de esta escena. Esto manda todo a dibujar al GPU al Render Target que cargamos antes
             d3dDevice.EndScene();
         }
@@ -648,7 +660,7 @@ namespace AlumnoEjemplos.Quicksort
             {
                 effectlluvia.Technique = "DefaultTechnique";
             }
-
+            
             //Cargamos parametros en el shader de Post-Procesado
             effectlluvia.SetValue("render_target2D", renderTarget2D);
             effectlluvia.SetValue("textura_alarma", alarmTexture.D3dTexture);
