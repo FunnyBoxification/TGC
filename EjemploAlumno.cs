@@ -71,6 +71,8 @@ namespace AlumnoEjemplos.Quicksort
 
         //Minimapa
         TgcSprite spriteMinimapa;
+        TgcSprite spriteBarcoPrincipal;
+        TgcSprite spriteBarcoBot;
         
         //ui
         TgcSprite sprBarraVida;
@@ -196,7 +198,10 @@ namespace AlumnoEjemplos.Quicksort
             Size minimapSize = spriteMinimapa.Texture.Size;
             spriteMinimapa.Scaling = new Vector2(0.5f, 0.5f);
             spriteMinimapa.Position = new Vector2(FastMath.Max(screenSize.Width  - minimapSize.Width/2, 0), FastMath.Max(screenSize.Height  - minimapSize.Height , 0));
-           
+
+            spriteBarcoPrincipal = new TgcSprite();
+            spriteBarcoPrincipal.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\pelota-azul.png");
+            spriteBarcoPrincipal.Scaling = new Vector2(0.025f,0.025f);
 
             //inicio//
 
@@ -495,7 +500,8 @@ namespace AlumnoEjemplos.Quicksort
 
             //Como estamos en modo CustomRenderEnabled, tenemos que dibujar todo nosotros, incluso el contador de FPS
             GuiController.Instance.Text3d.drawText("FPS: " + HighResolutionTimer.Instance.FramesPerSecond, 0, 0, Color.Yellow);
-            
+            GuiController.Instance.Text3d.drawText("Posicion X:" + barcoPrincipal.Mesh.Position.X, 200, 200, Color.Black);
+            GuiController.Instance.Text3d.drawText("Posicion Z:" + barcoPrincipal.Mesh.Position.Z, 250, 250, Color.Black);
 
             //Tambien hay que dibujar el indicador de los ejes cartesianos
             GuiController.Instance.AxisLines.render();
@@ -507,9 +513,15 @@ namespace AlumnoEjemplos.Quicksort
                 sprVidaLLena.Scaling = new Vector2(barcoPrincipal.Vida/150, 1);
                 sprVidaLLena.render();
             }
-
+            Size screenSize = GuiController.Instance.Panel3d.Size;
             spriteMinimapa.render();
-            
+
+            float ratioW = spriteMinimapa.Texture.Size.Width / screenSize.Width;
+            float ratioH = spriteMinimapa.Texture.Size.Height / screenSize.Height;
+
+            spriteBarcoPrincipal.Position = new Vector2(barcoPrincipal.Mesh.Position.Z * ratioW, barcoPrincipal.Mesh.Position.X);
+            spriteBarcoPrincipal.render();
+
             sprBarraVida.render();
             
 
