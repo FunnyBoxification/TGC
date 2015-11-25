@@ -205,14 +205,14 @@ namespace AlumnoEjemplos.Quicksort
             sprBarraVida.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\BarraVacia.png");
             Size textureSize4 = sprBarraVida.Texture.Size;
             
-            sprBarraVida.Scaling = new Vector2(1.5f, 1.5f);
+            sprBarraVida.Scaling = new Vector2(1f, 1f);
             sprBarraVida.Position = new Vector2(1, 1);
 
             sprVidaLLena = new TgcSprite();
             sprVidaLLena.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\vidallena.png");
             Size textureSize5 = sprVidaLLena.Texture.Size;
-            sprVidaLLena.Scaling = new Vector2(1.5f, 1.5f);
-            sprVidaLLena.Position = new Vector2(screenSize.Width-420f, screenSize.Height-95f);
+            sprVidaLLena.Scaling = new Vector2(1f, 1f);
+            sprVidaLLena.Position = new Vector2(1, 15);
 
             //ui
 
@@ -502,9 +502,16 @@ namespace AlumnoEjemplos.Quicksort
 
             GuiController.Instance.Drawer2D.beginDrawSprite();
 
+            if (barcoPrincipal.Vida > 0)
+            {
+                sprVidaLLena.Scaling = new Vector2(barcoPrincipal.Vida/150, 1);
+                sprVidaLLena.render();
+            }
+
             spriteMinimapa.render();
+            
             sprBarraVida.render();
-            sprVidaLLena.render();
+            
 
             GuiController.Instance.Drawer2D.endDrawSprite();
             //Viejo render aqui ///
@@ -652,8 +659,11 @@ namespace AlumnoEjemplos.Quicksort
                 {
                     if (bala.Mesh.Position.Y > 0)
                     {
-                        bala.Mover(elapsedTime);
-                        bala.Mesh.render();
+                        if (bala.col)
+                        {
+                            bala.Mover(elapsedTime);
+                            bala.Mesh.render();
+                        }
                     }
                 }
             }
