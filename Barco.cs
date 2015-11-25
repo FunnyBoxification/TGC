@@ -53,7 +53,7 @@ namespace AlumnoEjemplos.Quicksort
 
         public void dispararBala(int tipobala, int direccion)
         {
-            TgcMesh balaMesh;
+            
             TgcMesh instance = balamesh.createMeshInstance(balamesh.Name + "_");
             if (tipobala == 1)
             {

@@ -18,7 +18,7 @@ namespace AlumnoEjemplos.Quicksort
     class Bala
     {
 
-        bool col = false;
+        public bool col { get; set; } 
         public double alturaMax { get; set; }
         public bool activa { get; set; }
         public bool subiendo { get; set; }
@@ -33,6 +33,7 @@ namespace AlumnoEjemplos.Quicksort
             activa = true;
             subiendo = true;
             tipoBala = tipo;
+            col = false;
         }
         public int danio { get; set; }
         public TgcMesh Mesh { get; set; }
@@ -46,12 +47,13 @@ namespace AlumnoEjemplos.Quicksort
 
             foreach (Barco barco in BarcosEnemigos)
             {
-                TgcCollisionUtils.BoxBoxResult result = TgcCollisionUtils.classifyBoxBox(Mesh.BoundingBox, barco.Mesh.BoundingBox);
-                if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
+                if (col == false)
                 {
-                    if (col == false)
+                    TgcCollisionUtils.BoxBoxResult result = TgcCollisionUtils.classifyBoxBox(Mesh.BoundingBox, barco.Mesh.BoundingBox);
+                    if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
                     {
-                        barco.Vida = barco.Vida - danio;
+                    
+                        barco.Vida -= danio;
                         col = true;
 
                     }
