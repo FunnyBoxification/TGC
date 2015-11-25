@@ -212,7 +212,7 @@ namespace AlumnoEjemplos.Quicksort
             sprVidaLLena.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\vidallena.png");
             Size textureSize5 = sprVidaLLena.Texture.Size;
             sprVidaLLena.Scaling = new Vector2(1.5f, 1.5f);
-            sprVidaLLena.Position = new Vector2(1, 1);
+            sprVidaLLena.Position = new Vector2(screenSize.Width-420f, screenSize.Height-95f);
 
             //ui
 
@@ -495,14 +495,14 @@ namespace AlumnoEjemplos.Quicksort
 
             //Como estamos en modo CustomRenderEnabled, tenemos que dibujar todo nosotros, incluso el contador de FPS
             GuiController.Instance.Text3d.drawText("FPS: " + HighResolutionTimer.Instance.FramesPerSecond, 0, 0, Color.Yellow);
-            spriteMinimapa.render();
+            
 
             //Tambien hay que dibujar el indicador de los ejes cartesianos
             GuiController.Instance.AxisLines.render();
 
             GuiController.Instance.Drawer2D.beginDrawSprite();
 
-
+            spriteMinimapa.render();
             sprBarraVida.render();
             sprVidaLLena.render();
 
