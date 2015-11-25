@@ -68,8 +68,13 @@ namespace AlumnoEjemplos.Quicksort
         TgcSprite spriteFondo;
         TgcSprite spriteLetras;
         TgcSprite spriteInicio;
-        
         //inicio
+
+        //ui
+        TgcSprite sprBarraVida;
+        TgcSprite sprVidaLLena;
+        //ui
+
         //lluvia
         VertexBuffer screenQuadVB;
         Texture renderTarget2D;
@@ -100,8 +105,6 @@ namespace AlumnoEjemplos.Quicksort
 
         public override void init()
         {
-            pausaActiva = false;
-            comenzoJuego = false;
             //GuiController.Instance: acceso principal a todas las herramientas del Framework
 
             //Device de DirectX para crear primitivas
@@ -188,6 +191,22 @@ namespace AlumnoEjemplos.Quicksort
            
 
             //inicio//
+
+            //ui
+            sprBarraVida = new TgcSprite();
+            sprBarraVida.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\BarraVacia.png");
+            Size textureSize4 = sprBarraVida.Texture.Size;
+            
+            sprBarraVida.Scaling = new Vector2(1.5f, 1.5f);
+            sprBarraVida.Position = new Vector2(1, 1);
+
+            sprVidaLLena = new TgcSprite();
+            sprVidaLLena.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\vidallena.png");
+            Size textureSize5 = sprVidaLLena.Texture.Size;
+            sprVidaLLena.Scaling = new Vector2(1.5f, 1.5f);
+            sprVidaLLena.Position = new Vector2(1, 1);
+
+            //ui
 
             Bitmap b = (Bitmap)Bitmap.FromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\wallhaven-276951.jpg"); //"water_water_0056_01_preview.jpg");
             b.RotateFlip(RotateFlipType.Rotate90FlipX);
@@ -312,10 +331,10 @@ namespace AlumnoEjemplos.Quicksort
 
 
             //GuiController.Instance.Modifiers.addFloat("reflection", 0, 1, 0.35f);
-            GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-3000, 0, -3000), new Vector3(3000, 3000, 3000), new Vector3(-300, 1500, 3000));
+            GuiController.Instance.Modifiers.addVertex3f("lightPos", new Vector3(-3000, 0, -3000), new Vector3(3000, 3000, 3000), new Vector3(0, 1950, -2400));
             GuiController.Instance.Modifiers.addColor("lightColor", Color.LightYellow);
             //GuiController.Instance.Modifiers.addFloat("bumpiness", 0, 1, 1f);
-            GuiController.Instance.Modifiers.addFloat("lightIntensity", 0, 500, 325);
+            GuiController.Instance.Modifiers.addFloat("lightIntensity", 0, 500, 150);
             GuiController.Instance.Modifiers.addFloat("lightAttenuation", 0.1f, 2, 0.1f);
             GuiController.Instance.Modifiers.addFloat("specularEx", 0, 100, 20f);
             
@@ -359,7 +378,7 @@ namespace AlumnoEjemplos.Quicksort
                 //Finalizar el dibujado de Sprites
                 GuiController.Instance.Drawer2D.endDrawSprite();
 
-                if (d3dInput.keyPressed(Key.Space))
+                if (d3dInput.keyDown(Key.Space))
                 {
                     if(!comenzoJuego)
                     {
@@ -367,7 +386,7 @@ namespace AlumnoEjemplos.Quicksort
                     }
                 }
 
-                if (d3dInput.keyPressed(Key.P))
+                if (d3dInput.keyDown(Key.P))
                 {
                         pausaActiva = false;
                  }
@@ -466,11 +485,18 @@ namespace AlumnoEjemplos.Quicksort
             //Tambien hay que dibujar el indicador de los ejes cartesianos
             GuiController.Instance.AxisLines.render();
 
+            GuiController.Instance.Drawer2D.beginDrawSprite();
+
+
+            sprBarraVida.render();
+            sprVidaLLena.render();
+
+            GuiController.Instance.Drawer2D.endDrawSprite();
             //Viejo render aqui ///
             /*
           //Obtener valor de UserVar (hay que castear)
           int valor = (int)GuiController.Instance.UserVars.getValue("variablePrueba");
-            
+           
 
           //Obtener valores de Modifiers
           float valorFloat = (float)GuiController.Instance.Modifiers["valorFloat"];
