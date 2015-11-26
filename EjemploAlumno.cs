@@ -338,8 +338,8 @@ namespace AlumnoEjemplos.Quicksort
             barcoPrincipal.BarcosEnemigos = enemigos;
 
             // iluminacion en los barcos
-            barcoPrincipal.Mesh.Effect =GuiController.Instance.Shaders.TgcMeshPointLightShader;// efectosAguaIluminacion;
-            barcoPrincipal.Mesh.Technique = GuiController.Instance.Shaders.getTgcMeshTechnique(barcoPrincipal.Mesh.RenderType); //"EnvironmentMapTechnique";
+            barcoPrincipal.Mesh.Effect = efectosAguaIluminacion;//GuiController.Instance.Shaders.TgcMeshPointLightShader;// efectosAguaIluminacion;
+            barcoPrincipal.Mesh.Technique = "DIFFUSE_MAP";//GuiController.Instance.Shaders.getTgcMeshTechnique(barcoPrincipal.Mesh.RenderType); //"EnvironmentMapTechnique";
             //barcoEnemigo.Mesh.Effect = GuiController.Instance.Shaders.TgcMeshPointLightShader; //efectosAguaIluminacion;
             //barcoEnemigo.Mesh.Technique = GuiController.Instance.Shaders.getTgcMeshTechnique(barcoEnemigo.Mesh.RenderType);//"EnvironmentMapTechnique";
 
@@ -525,8 +525,8 @@ namespace AlumnoEjemplos.Quicksort
 
             //Como estamos en modo CustomRenderEnabled, tenemos que dibujar todo nosotros, incluso el contador de FPS
             GuiController.Instance.Text3d.drawText("FPS: " + HighResolutionTimer.Instance.FramesPerSecond, 0, 0, Color.Yellow);
-            GuiController.Instance.Text3d.drawText("Posicion X:" + barcoPrincipal.Mesh.Position.X, 200, 200, Color.Black);
-            GuiController.Instance.Text3d.drawText("Posicion Z:" + barcoPrincipal.Mesh.Position.Z, 250, 250, Color.Black);
+            GuiController.Instance.Text3d.drawText(GuiController.Instance.Shaders.getTgcMeshTechnique(barcoPrincipal.Mesh.RenderType), 200, 200, Color.Black);
+            //GuiController.Instance.Text3d.drawText("Posicion Z:" + barcoPrincipal.Mesh.Position.Z, 250, 250, Color.Black);
 
             //Tambien hay que dibujar el indicador de los ejes cartesianos
             GuiController.Instance.AxisLines.render();
