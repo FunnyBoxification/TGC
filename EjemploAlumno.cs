@@ -73,7 +73,7 @@ namespace AlumnoEjemplos.Quicksort
         //Minimapa
         TgcSprite spriteMinimapa;
         TgcSprite spriteBarcoPrincipal;
-        TgcSprite spriteBarcoBot;
+        List<TgcSprite> spritesBarcosBot;
         
         //ui
         TgcSprite sprBarraVida;
@@ -534,6 +534,13 @@ namespace AlumnoEjemplos.Quicksort
             }
             Size screenSize = GuiController.Instance.Panel3d.Size;
             spriteMinimapa.render();
+
+            spritesBarcosBot = new List<TgcSprite>();
+            foreach (Barco barco in enemigos)
+            {
+                TgcSprite spritebarco = new TgcSprite();
+                spritebarco.Position = new Vector2(barco.Mesh.Position.X/100, barco.Mesh.Position.Z/100);
+            }
 
             float ratioW = spriteMinimapa.Texture.Size.Width / screenSize.Width;
             float ratioH = spriteMinimapa.Texture.Size.Height / screenSize.Height;
