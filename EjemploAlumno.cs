@@ -73,10 +73,10 @@ namespace AlumnoEjemplos.Quicksort
         //Minimapa
         TgcSprite spriteMinimapa;
         TgcSprite spriteBarcoPrincipal;
-        TgcSprite spriteBarcoBot;
-
-        //fin
+        List<TgcSprite> spritesBarcosBot;
+		
         TgcSprite spriteTermino;
+
         
         //ui
         TgcSprite sprBarraVida;
@@ -206,14 +206,16 @@ namespace AlumnoEjemplos.Quicksort
 
             spriteMinimapa = new TgcSprite();
             spriteMinimapa.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\minimapa.png");
+            
+            spriteMinimapa.Scaling = new Vector2(0.2f, 0.2f);
             Size minimapSize = spriteMinimapa.Texture.Size;
-            spriteMinimapa.Scaling = new Vector2(0.5f, 0.5f);
 
-            spriteMinimapa.Position = new Vector2(FastMath.Max(screenSize.Width  - minimapSize.Width/2, 0), FastMath.Max(screenSize.Height  - minimapSize.Height , 0));
+
+            spriteMinimapa.Position = new Vector2(FastMath.Max(screenSize.Width  - 210, 0), FastMath.Max(screenSize.Height  - minimapSize.Height , 0));
 
             spriteBarcoPrincipal = new TgcSprite();
-            spriteBarcoPrincipal.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\pelota-azul.png");
-            spriteBarcoPrincipal.Scaling = new Vector2(0.025f,0.025f);
+            spriteBarcoPrincipal.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\pointgreen.png");
+            spriteBarcoPrincipal.Scaling = new Vector2(0.5f,0.5f);
 
 
             //inicio//
@@ -281,7 +283,7 @@ namespace AlumnoEjemplos.Quicksort
 
             TgcScene scene2 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\Boteconcañon\\BoteConCanion-TgcScene.xml");
             mainMesh = scene2.Meshes[0];
-            mainMesh.Position = new Vector3(400f,0f, 400f);
+            mainMesh.Position = new Vector3(-200f,0f, 200f);
             mainMesh.Scale = new Vector3(2f,2f,2f);
             TgcScene scene4 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\Boteconcañon\\BoteConCanion-TgcScene.xml");
             meshBot = scene4.Meshes[0];
@@ -297,7 +299,7 @@ namespace AlumnoEjemplos.Quicksort
             barcoPrincipal = new BarcoPlayer(150, 50, VELOCIDAD_MOVIMIENTO, ACELERACION, VELOCIDAD_ROTACION, mainMesh, 0.06, loader,balaMesh2);
 
             //pongo enemigos
-            int rows = 10;
+            int rows = 12;
             
             float offset = 3000;
             
@@ -343,6 +345,7 @@ namespace AlumnoEjemplos.Quicksort
 
             //Camara en tercera persona focuseada en el barco (canoa) 
 
+           
 
          
 
@@ -541,12 +544,31 @@ namespace AlumnoEjemplos.Quicksort
                 sprVidaLLena.render();
             }
             Size screenSize = GuiController.Instance.Panel3d.Size;
-            spriteMinimapa.render();
+
+            spriteMinimapa.RotationCenter = new Vector2(103f , 103f );
+            spriteMinimapa.Rotation += elapsedTime * 3.14159f;
+             spriteMinimapa.render();
+
+            //spritesBarcosBot = new List<TgcSprite>();
+            float centroMapaX = spriteMinimapa.Position.X+105f;
+            float centroMapaY = spriteMinimapa.Position.Y+95f;
+            foreach (Barco barco in enemigos)
+            {
+                if (barco.Vida > 0)
+                {
+                    TgcSprite spritebarco = new TgcSprite();
+                    spritebarco.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\buttonred.png");
+                    spritebarco.Position = new Vector2(centroMapaX + barco.Mesh.Position.X / 35, centroMapaY + barco.Mesh.Position.Z / 35);
+                    spritebarco.Scaling = new Vector2(0.08f, 0.08f);
+                    spritebarco.render();
+                }
+                //spritesBarcosBot.Add(spritebarco);
+            }
 
             float ratioW = spriteMinimapa.Texture.Size.Width / screenSize.Width;
             float ratioH = spriteMinimapa.Texture.Size.Height / screenSize.Height;
 
-            spriteBarcoPrincipal.Position = new Vector2(barcoPrincipal.Mesh.Position.Z * ratioW, barcoPrincipal.Mesh.Position.X);
+            spriteBarcoPrincipal.Position = new Vector2(centroMapaX + barcoPrincipal.Mesh.Position.X / 35, centroMapaY + barcoPrincipal.Mesh.Position.Z / 35);
             spriteBarcoPrincipal.render();
 
             sprBarraVida.render();
