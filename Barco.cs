@@ -157,7 +157,7 @@ namespace AlumnoEjemplos.Quicksort
             //Vector3 ejeX = new Vector3(1, 0, 0);
             //Vector3 vectplanchado1 = new Vector3(this.Mesh.Position.X, y, this.Mesh.Position.Z);
             //Vector3 vectnDireccion1 = Vector3.Normalize(vectplanchado1 - PosAntes);
-            Mesh.move(0, (float)y + 0.025f, 0);
+            Mesh.move(0, (float)y + 0.03f, 0);
 
             float z = FastMath.Cos(Mesh.Rotation.Y);
             float x = FastMath.Sin(Mesh.Rotation.Y);
@@ -199,7 +199,7 @@ namespace AlumnoEjemplos.Quicksort
         {
             float y = Calculo( time,Mesh.Position.X);
 
-            Mesh.move(0, -(float)y - 0.025f, 0);
+            Mesh.move(0, -(float)y - 0.03f, 0);
         }
 
         public void hundir(float elapsedtime)

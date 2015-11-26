@@ -208,7 +208,7 @@ struct LightSampleValues {
    //Proyectar posicion
    Output.Position = mul( Pos, matWorldViewProj);
    //Propago  las coord. de textura 
-   Output.Texcoord  = Texcoord + time/70 ;
+   Output.Texcoord  = Texcoord + time/100 ;
    // Calculo la posicion real
    Output.Pos = mul(Pos,matWorld).xyz;
    // Transformo la normal y la normalizo

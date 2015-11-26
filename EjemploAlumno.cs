@@ -31,6 +31,7 @@ namespace AlumnoEjemplos.Quicksort
 
         bool pausaActiva = false;
         bool comenzoJuego = false;
+        bool terminoJuego = false;
 
         SmartTerrain oceano;
 
@@ -110,6 +111,7 @@ namespace AlumnoEjemplos.Quicksort
         public override void init()
         {
             //GuiController.Instance: acceso principal a todas las herramientas del Framework
+            enemigos = new List<Barco>();
 
             //Device de DirectX para crear primitivas
             Microsoft.DirectX.Direct3D.Device d3dDevice = GuiController.Instance.D3dDevice;
@@ -288,7 +290,7 @@ namespace AlumnoEjemplos.Quicksort
             //pongo enemigos
             int rows = 10;
             
-            float offset = 5000;
+            float offset = 3000;
             
             for (int i = 0; i < rows; i++)
             {
@@ -375,6 +377,16 @@ namespace AlumnoEjemplos.Quicksort
             //Device de DirectX para renderizar
             Microsoft.DirectX.Direct3D.Device d3dDevice = GuiController.Instance.D3dDevice;
             TgcD3dInput d3dInput = GuiController.Instance.D3dInput;
+            if (terminoJuego)
+            {
+                if (d3dInput.keyPressed(Key.Return))
+                {
+                    close();
+                    init();
+                    render(elapsedTime);
+                    return;
+                }
+            }
             if (pausaActiva || !comenzoJuego)
             {
                 timemenu += elapsedTime;
@@ -395,7 +407,7 @@ namespace AlumnoEjemplos.Quicksort
                 //Finalizar el dibujado de Sprites
                 GuiController.Instance.Drawer2D.endDrawSprite();
 
-                if (d3dInput.keyDown(Key.Space))
+                if (d3dInput.keyPressed(Key.Space))
                 {
                     if(!comenzoJuego)
                     {
@@ -403,7 +415,7 @@ namespace AlumnoEjemplos.Quicksort
                     }
                 }
 
-                if (d3dInput.keyDown(Key.P))
+                if (d3dInput.keyPressed(Key.P))
                 {
                         pausaActiva = false;
                  }
@@ -510,6 +522,11 @@ namespace AlumnoEjemplos.Quicksort
 
             GuiController.Instance.Drawer2D.beginDrawSprite();
 
+            if (terminoJuego)
+            {
+                //mostrar sprite de apretar ENTER para reiniciar
+            }
+
             if (barcoPrincipal.Vida > 0)
             {
                 sprVidaLLena.Scaling = new Vector2(barcoPrincipal.Vida/150f, 1);
@@ -601,6 +618,7 @@ namespace AlumnoEjemplos.Quicksort
             else
             {
                 barcoPrincipal.hundir(elapsedTime);
+                terminoJuego = true;
             }
             foreach (BarcoBot barcoenem in enemigos)
             {
@@ -736,10 +754,15 @@ namespace AlumnoEjemplos.Quicksort
         public override void close()
         {
             //escena.disposeAll();
+            GuiController.Instance.Modifiers.clear();
             mainMesh.dispose();
             meshBot.dispose();
             balaMesh1.dispose();
             balaMesh2.dispose();
+            barcoEnemigo = null;
+            barcoPrincipal = null;
+            enemigos = null;
+            g_pCubeMapAgua = null;
             
         }
 
