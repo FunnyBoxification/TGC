@@ -74,6 +74,9 @@ namespace AlumnoEjemplos.Quicksort
         TgcSprite spriteMinimapa;
         TgcSprite spriteBarcoPrincipal;
         List<TgcSprite> spritesBarcosBot;
+		
+        TgcSprite spriteTermino;
+
         
         //ui
         TgcSprite sprBarraVida;
@@ -112,6 +115,7 @@ namespace AlumnoEjemplos.Quicksort
         {
             //GuiController.Instance: acceso principal a todas las herramientas del Framework
             enemigos = new List<Barco>();
+            terminoJuego = false;
 
             //Device de DirectX para crear primitivas
             Microsoft.DirectX.Direct3D.Device d3dDevice = GuiController.Instance.D3dDevice;
@@ -188,6 +192,11 @@ namespace AlumnoEjemplos.Quicksort
 
             spriteInicio.Scaling = new Vector2(0.4f, 0.3f);
             Size textureSize3 = spriteInicio.Texture.Size;
+
+            spriteTermino = new TgcSprite();
+            spriteTermino.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\termino.png");
+            //spriteTermino.Scaling = new Vector2(0.5f,0.5f);
+            spriteTermino.Position = new Vector2(screenSize.Width / 4, screenSize.Height / 2);
             
             spriteLetras.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize2.Width / 2, 0), FastMath.Max(screenSize.Height / 2 - textureSize2.Height / 2, 0));
             spriteLetras.Position = new Vector2(spriteLetras.Position.X + 110, spriteLetras.Position.Y);
@@ -527,7 +536,7 @@ namespace AlumnoEjemplos.Quicksort
 
             if (terminoJuego)
             {
-                //mostrar sprite de apretar ENTER para reiniciar
+                spriteTermino.render();
             }
 
             if (barcoPrincipal.Vida > 0)
