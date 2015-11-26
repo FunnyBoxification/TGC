@@ -383,7 +383,7 @@ namespace AlumnoEjemplos.Quicksort
                 {
                     close();
                     init();
-                    render(elapsedTime);
+                    //render(elapsedTime);
                     return;
                 }
             }
