@@ -33,6 +33,8 @@ namespace AlumnoEjemplos.Quicksort
         bool comenzoJuego = false;
         bool terminoJuego = false;
 
+        
+
         SmartTerrain oceano;
 
         BarcoPlayer barcoPrincipal;
@@ -45,6 +47,7 @@ namespace AlumnoEjemplos.Quicksort
         static TgcScene escena;
         TgcMesh mainMesh, agua, meshBot,balaMesh1,balaMesh2; 
         TgcSkyBox skyBox;
+        float cooldownRelampago = 0;
 
         float near_plane = 1f;
         float far_plane = 10000f;
@@ -64,7 +67,7 @@ namespace AlumnoEjemplos.Quicksort
         float alfa_sol;             // pos. del sol
         //TgcBox sol;
         bool cerca;
-
+        bool relampagoOn = false;
        //inicio
         TgcSprite spriteFondo;
         TgcSprite spriteLetras;
@@ -156,6 +159,8 @@ namespace AlumnoEjemplos.Quicksort
 
             //Configurar Technique dentro del shader
             effectlluvia.Technique = "AlarmaTechnique";
+
+            
 
             //Cargar textura que se va a dibujar arriba de la escena del Render Target
             alarmTexture = TgcTexture.createTexture(d3dDevice, GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\rain.png");
@@ -315,10 +320,12 @@ namespace AlumnoEjemplos.Quicksort
 
                     
                     var barcoenem = new BarcoBot(100, 10, 100, ACELERACION, 18, instance, 0.05, barcoPrincipal, loader,balaMesh1);
-                    
 
-                    barcoenem.Mesh.Effect = GuiController.Instance.Shaders.TgcMeshPointLightShader; //efectosAguaIluminacion;
+
+                    barcoenem.Mesh.Effect = TgcShaders.loadEffect(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\shader_bote.fx"); //efectosAguaIluminacion;
                     barcoenem.Mesh.Technique = GuiController.Instance.Shaders.getTgcMeshTechnique(barcoenem.Mesh.RenderType);//"EnvironmentMapTechnique";
+                    barcoenem.BarcosEnemigos = new List<Barco>();
+                    barcoenem.BarcosEnemigos.Add(barcoPrincipal);
                     enemigos.Add(barcoenem);
                 
             }
@@ -330,6 +337,7 @@ namespace AlumnoEjemplos.Quicksort
             efectosAguaIluminacion = TgcShaders.loadEffect(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\shader_agua.fx");
             oceano.Effect = efectosAguaIluminacion;
             oceano.Technique = "RenderAgua";//"EnvironmentMapTechnique"; //"RenderAgua";
+            oceano.AlphaBlendEnable = true;
 
             
 
@@ -338,8 +346,8 @@ namespace AlumnoEjemplos.Quicksort
             barcoPrincipal.BarcosEnemigos = enemigos;
 
             // iluminacion en los barcos
-            barcoPrincipal.Mesh.Effect = efectosAguaIluminacion;//GuiController.Instance.Shaders.TgcMeshPointLightShader;// efectosAguaIluminacion;
-            barcoPrincipal.Mesh.Technique = "DIFFUSE_MAP";//GuiController.Instance.Shaders.getTgcMeshTechnique(barcoPrincipal.Mesh.RenderType); //"EnvironmentMapTechnique";
+            barcoPrincipal.Mesh.Effect = TgcShaders.loadEffect(GuiController.Instance.AlumnoEjemplosMediaDir + "quicksort\\shader_bote.fx");//GuiController.Instance.Shaders.TgcMeshPointLightShader;// efectosAguaIluminacion; //GuiController.Instance.Shaders.TgcMeshPointLightShader;// efectosAguaIluminacion;
+            barcoPrincipal.Mesh.Technique = GuiController.Instance.Shaders.getTgcMeshTechnique(barcoPrincipal.Mesh.RenderType); //"EnvironmentMapTechnique";
             //barcoEnemigo.Mesh.Effect = GuiController.Instance.Shaders.TgcMeshPointLightShader; //efectosAguaIluminacion;
             //barcoEnemigo.Mesh.Technique = GuiController.Instance.Shaders.getTgcMeshTechnique(barcoEnemigo.Mesh.RenderType);//"EnvironmentMapTechnique";
 
@@ -524,8 +532,8 @@ namespace AlumnoEjemplos.Quicksort
 
 
             //Como estamos en modo CustomRenderEnabled, tenemos que dibujar todo nosotros, incluso el contador de FPS
-            GuiController.Instance.Text3d.drawText("FPS: " + HighResolutionTimer.Instance.FramesPerSecond, 0, 0, Color.Yellow);
-            GuiController.Instance.Text3d.drawText(GuiController.Instance.Shaders.getTgcMeshTechnique(barcoPrincipal.Mesh.RenderType), 200, 200, Color.Black);
+            GuiController.Instance.Text3d.drawText("FPS: " + HighResolutionTimer.Instance.FramesPerSecond, 0, 60, Color.Yellow);
+            //GuiController.Instance.Text3d.drawText(GuiController.Instance.Shaders.getTgcMeshTechnique(barcoPrincipal.Mesh.RenderType), 200, 200, Color.Black);
             //GuiController.Instance.Text3d.drawText("Posicion Z:" + barcoPrincipal.Mesh.Position.Z, 250, 250, Color.Black);
 
             //Tambien hay que dibujar el indicador de los ejes cartesianos
@@ -614,13 +622,51 @@ namespace AlumnoEjemplos.Quicksort
 
             efectosAguaIluminacion.SetValue("lightColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["lightColor"]));
             efectosAguaIluminacion.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
+            if (!activar_efecto)
+            {
+                efectosAguaIluminacion.SetValue("lightIntensity", (float)GuiController.Instance.Modifiers["lightIntensity"]);
+
+            }
+            else
+            {
+                efectosAguaIluminacion.SetValue("lightIntensity", 75f);
+                
+            }
             efectosAguaIluminacion.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(eyePosition));
-            efectosAguaIluminacion.SetValue("lightIntensity", (float)GuiController.Instance.Modifiers["lightIntensity"]);
             //barcoPrincipal.Mesh.Effect.SetValue("bumpiness", (float)GuiController.Instance.Modifiers["bumpiness"]);
             efectosAguaIluminacion.SetValue("lightAttenuation", (float)GuiController.Instance.Modifiers["lightAttenuation"]);
             //barcoPrincipal.Mesh.Effect.SetValue("reflection", (float)GuiController.Instance.Modifiers["reflection"]);
             efectosAguaIluminacion.SetValue("eyePosition", TgcParserUtils.vector3ToFloat4Array(GuiController.Instance.ThirdPersonCamera.getPosition()));
             efectosAguaIluminacion.SetValue("lightPosition", TgcParserUtils.vector3ToFloat4Array(lightPos));
+
+            //cd relampago + Xf es 
+             var rnd = new Random();
+             if (!relampagoOn)
+             {
+                 if (cooldownRelampago + rnd.Next(2, 4) < time)
+                 {
+
+                     effectlluvia.SetValue("relampagoOn", true);
+                     cooldownRelampago = time;
+                     relampagoOn = true;
+                 }
+                 else
+                 {
+                     effectlluvia.SetValue("relampagoOn", false);
+                 }
+             }
+             else {
+                 if (cooldownRelampago + ((float)rnd.Next(4, 7))/20 < time)
+                 {
+
+                     effectlluvia.SetValue("relampagoOn", true);
+                     relampagoOn = false;
+                 }
+                 else
+                 {
+                     effectlluvia.SetValue("relampagoOn", false);
+                 }
+             }
 
             efectosAguaIluminacion.SetValue("materialEmissiveColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mEmissive"]));
             efectosAguaIluminacion.SetValue("materialAmbientColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mAmbient"]));
@@ -678,7 +724,17 @@ namespace AlumnoEjemplos.Quicksort
             barcoPrincipal.Mesh.Effect.SetValue("materialDiffuseColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mDiffuse"]));
             barcoPrincipal.Mesh.Effect.SetValue("materialSpecularColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mSpecular"]));
             barcoPrincipal.Mesh.Effect.SetValue("materialSpecularExp", (float)GuiController.Instance.Modifiers["specularEx"]);
+            barcoPrincipal.Mesh.Effect.SetValue("daniado", barcoPrincipal.daniado ? 1 : 0);
+            barcoPrincipal.Mesh.Effect.SetValue("time", time);
+            barcoPrincipal.Mesh.Effect.SetValue("terminoJuego", terminoJuego);
             barcoPrincipal.Mesh.render();
+            if (barcoPrincipal.timerDaniado != null)
+            {
+                if (barcoPrincipal.timerDaniado.ElapsedMilliseconds >= 2000)
+                {
+                    barcoPrincipal.daniado = false;
+                }
+            }
 
             foreach (BarcoBot barcoEnem in enemigos)
             {
@@ -697,9 +753,26 @@ namespace AlumnoEjemplos.Quicksort
                 barcoEnem.Mesh.Effect.SetValue("materialDiffuseColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mDiffuse"]));
                 barcoEnem.Mesh.Effect.SetValue("materialSpecularColor", ColorValue.FromColor((Color)GuiController.Instance.Modifiers["mSpecular"]));
                 barcoEnem.Mesh.Effect.SetValue("materialSpecularExp", (float)GuiController.Instance.Modifiers["specularEx"]);
+                barcoEnem.Mesh.Effect.SetValue("time", time);
+                barcoEnem.Mesh.Effect.SetValue("terminoJuego", false);
+                if (barcoEnem.daniado)
+                {
+                    barcoEnem.Mesh.Effect.SetValue("daniado", 1);
+                }
+                else
+                {
+                    barcoEnem.Mesh.Effect.SetValue("daniado", 0);
+                }
 
                 barcoEnem.Mesh.render();
                 barcoEnem.volverAltura(time);
+                if (barcoEnem.timerDaniado != null)
+                {
+                    if (barcoEnem.timerDaniado.ElapsedMilliseconds >= 2000)
+                    {
+                        barcoEnem.daniado = false;
+                    }
+                }
 
             }
             barcoPrincipal.volverAltura(time);
@@ -764,6 +837,7 @@ namespace AlumnoEjemplos.Quicksort
             effectlluvia.SetValue("render_target2D", renderTarget2D);
             effectlluvia.SetValue("textura_alarma", alarmTexture.D3dTexture);
             effectlluvia.SetValue("alarmaScaleFactor", intVaivenAlarm.update());
+            effectlluvia.SetValue("time", time);
 
             //Limiamos la pantalla y ejecutamos el render del shader
             d3dDevice.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.Black, 1.0f, 0);

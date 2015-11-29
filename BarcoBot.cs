@@ -27,6 +27,7 @@ namespace AlumnoEjemplos.Quicksort
             BarcoEnemigo = barcoEnemigo;
             LastPos = Mesh.Position;
             BarcosEnemigos.Add(barcoEnemigo);
+            daniado = false;
 
         }
 

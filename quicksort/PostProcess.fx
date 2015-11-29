@@ -7,7 +7,8 @@
 /* DEFAULT */
 /**************************************************************************************/
 
-
+float time=0;
+bool relampagoOn;
 //Input del Vertex Shader
 struct VS_INPUT_DEFAULT 
 {
@@ -130,6 +131,12 @@ float4 ps_alarma( PS_INPUT_DEFAULT Input ) : COLOR0
 	
 	//Obtener color de textura de alarma, escalado por un factor
 	float4 color2 = tex2D( sampler_alarma, Input.Texcoord ) *0.2;
+	
+	//Escalar el color para oscurecerlo
+	if(relampagoOn ) {
+	float value = ((color.r + color.g + color.b) / 1) * scaleFactor; 
+	color.rgb = color.rgb * (1 - scaleFactor) + value * scaleFactor;
+	}
 	
 	//Mezclar ambos texels
 	return color + color2;

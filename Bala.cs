@@ -52,12 +52,19 @@ namespace AlumnoEjemplos.Quicksort
                     TgcCollisionUtils.BoxBoxResult result = TgcCollisionUtils.classifyBoxBox(Mesh.BoundingBox, barco.Mesh.BoundingBox);
                     if (result == TgcCollisionUtils.BoxBoxResult.Adentro || result == TgcCollisionUtils.BoxBoxResult.Atravesando)
                     {
-                    
-                        barco.Vida -= danio;
-                        col = true;
 
+                        barco.Vida -= danio;
+                        barco.daniado = true;
+                        col = true;
+                        barco.timerDaniado = new System.Diagnostics.Stopwatch();
+                        barco.timerDaniado.Start();
+                    }
+                    else
+                    {
+                        //barco.daniado = false;
                     }
                 }
+
             }
             //foreach (TgcMesh mesh in EjemploAlumno.getEscenaMeshes())
             //{

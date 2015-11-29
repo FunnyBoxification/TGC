@@ -14,6 +14,8 @@ using TgcViewer.Utils.Terrain;
 using TgcViewer.Utils.Shaders;
 using TgcViewer.Utils.TgcGeometry;
 using TgcViewer.Utils.Collision.ElipsoidCollision;
+using System.Timers;
+using System.Diagnostics;
 
 
 namespace AlumnoEjemplos.Quicksort
@@ -33,6 +35,7 @@ namespace AlumnoEjemplos.Quicksort
         public List<Barco> BarcosEnemigos { get; set; }
         public Vector3 PosAntes { get; set; }
         public TgcMesh balamesh { get; set; }
+        public Stopwatch timerDaniado { get; set; }
 
         public Barco(int vida, int danio, double velocidad, double rotacion, TgcMesh mesh,double potencia, TgcSceneLoader ldr, TgcMesh bala)
         {
@@ -49,6 +52,7 @@ namespace AlumnoEjemplos.Quicksort
             balas = new List<Bala>();
             BarcosEnemigos = new List<Barco>();
             balamesh = bala;
+            daniado = false;
         }
 
         public void dispararBala(int tipobala, int direccion)
@@ -117,7 +121,7 @@ namespace AlumnoEjemplos.Quicksort
         {
             if (this.VelocidadMov == 0 || (VelocidadMov < 0.05 && VelocidadMov > -0.05))
             {
-                VelocidadMov = 0.2;
+                VelocidadMov = 0.5;
             }
 
             if (this.VelocidadMovMax > this.VelocidadMov)
@@ -157,7 +161,7 @@ namespace AlumnoEjemplos.Quicksort
             //Vector3 ejeX = new Vector3(1, 0, 0);
             //Vector3 vectplanchado1 = new Vector3(this.Mesh.Position.X, y, this.Mesh.Position.Z);
             //Vector3 vectnDireccion1 = Vector3.Normalize(vectplanchado1 - PosAntes);
-            Mesh.move(0, (float)y + 0.03f, 0);
+            Mesh.move(0, (float)y + 0.035f, 0);
 
             float z = FastMath.Cos(Mesh.Rotation.Y);
             float x = FastMath.Sin(Mesh.Rotation.Y);
@@ -199,7 +203,7 @@ namespace AlumnoEjemplos.Quicksort
         {
             float y = Calculo( time,Mesh.Position.X);
 
-            Mesh.move(0, -(float)y - 0.03f, 0);
+            Mesh.move(0, -(float)y - 0.035f, 0);
         }
 
         public void hundir(float elapsedtime)
@@ -262,6 +266,6 @@ namespace AlumnoEjemplos.Quicksort
 
 
 
-        public bool dañado { get; set; }
+        public bool daniado { get; set; }
     }
 }
